@@ -1,4 +1,4 @@
-<?php
+ <?php
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
     $conn->close();
 }
-?>
+?> 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -40,17 +40,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="src/output.css">
+    <link href="https://fonts.googleapis.com/css2?family=Grechen+Fuemen&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <h2>Register</h2>
+<div class="flex justify-center pt-5 mt-40">
+    <div class="border-2 bg-gray-150 shadow2xl shadow-violet-400 rounded-md">
+    <div class="mt-10 ml-10 mr-10 mb-10 ">
+
+    <h1 class="font-Grechen Fuemen">Register Here!</h1>
+    
     <form action="" method="post">
+        <label>Username</label><br>
         <input type="text" name="username" placeholder="Enter Your Username" required><br>
+        <label >Email</label><br>
         <input type="email" name="email" placeholder="Enter Your Email" required><br>
+        <label>Phone</label><br>
         <input type="text" name="phone" placeholder="Phone Number" required pattern="[0-9]{10}"><br>
+        <label>Password</label><br>
         <input type="password" name="password" placeholder="Enter Your Password" required><br>
-        <button type="submit">Register</button>
+        <button type="submit">Sign Up</button>
     </form>
+    </div>
+</div>
+</div>
 </body>
-</html>
+</html> 
