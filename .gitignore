@@ -1,0 +1,60 @@
+# Ignore node_modules if you're using a JS front-end build system (Optional)
+node_modules/
+
+# Ignore IDE and editor files
+.idea/
+.vscode/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore log files
+*.log
+*.log.*
+
+# Ignore PHP session files
+session/
+
+# Ignore Composer's vendor directory (it will be regenerated from composer install)
+/vendor/
+
+# Ignore uploaded files or any large data files
+/uploads/
+*.tar.gz
+*.zip
+
+# Ignore temporary files
+*.swp
+*.swo
+*.bak
+
+# Ignore compiled PHP files
+*.phar
+*.tar
+*.zip
+
+# Ignore custom and config files (if sensitive)
+.env
+*.env
+*.env.local
+
+# Ignore cache files and compiled files
+/cache/
+*.php~
+
+# Ignore build directories (if using a build tool like Webpack, Gulp, etc.)
+/build/
+/dist/
+
+# Ignore XAMPP and other environment-specific files
+/xampp/
+
+# Ignore PHPStorm/IntelliJ files (if you're using PHPStorm/IntelliJ)
+.idea/
+
+# Ignore Composer cache directory
+/composer-cache/
+
+# Ignore IDE settings files (if any)
+*.iml
