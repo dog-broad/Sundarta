@@ -9,8 +9,8 @@
 -- ===========================================
 
 -- Create the database
-CREATE DATABASE IF NOT EXISTS sundarta;
-USE sundarta;
+CREATE DATABASE IF NOT EXISTS sundarta_db;
+USE sundarta_db;
 
 -- ===========================================
 -- Table: users
