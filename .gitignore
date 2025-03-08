@@ -43,11 +43,6 @@ session/
 /cache/
 *.php~
 
-# Ignore assets folder if you're pushing a clean repo and the assets are generated or can be pulled by a CI/CD pipeline
-/assets/css/
-/assets/js/
-/assets/images/
-
 # Ignore build directories (if using a build tool like Webpack, Gulp, etc.)
 /build/
 /dist/

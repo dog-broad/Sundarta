@@ -34,6 +34,9 @@ switch ($request_uri) {
         requireLogin();
         require 'frontend/profile.php';
         break;
+    case $base_path . '/template':
+        require 'frontend/test.php';
+        break;
     default:
         http_response_code(404);
         require 'frontend/404.php';
