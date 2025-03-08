@@ -1,0 +1,11 @@
+{
+    "name": "sundarta/beauty-wellness",
+    "description": "Beauty and wellness e-commerce site",
+    "type": "project",
+    "require": {
+        "monolog/monolog": "^3.8",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "license": "MIT",
+    "minimum-stability": "stable"
+}
