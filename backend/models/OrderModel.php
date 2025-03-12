@@ -5,22 +5,41 @@ class OrderModel extends BaseModel {
     public function __construct() {
         parent::__construct();
         $this->table = 'orders';
+        $this->itemsTable = 'order_items';
     }
 
     /**
      * Create a new order
      * 
      * @param int $userId User ID
-     * @param int $productId Product ID
-     * @param int $quantity Quantity
-     * @param float $totalPrice Total price
+     * @param array $items Array of items (each item is an array with keys: product_id, quantity, total_price)
      * @param string $status Order status (default: pending)
      * @return int|false Order ID or false on failure
      */
-    public function create($userId, $productId, $quantity, $totalPrice, $status = 'pending') {
-        $sql = "INSERT INTO {$this->table} (user_id, product_id, quantity, total_price, status) 
-                VALUES (?, ?, ?, ?, ?)";
-        return $this->insert($sql, [$userId, $productId, $quantity, $totalPrice, $status], 'iidss');
+    public function create($userId, $items, $status = 'pending') {
+        $this->beginTransaction();
+        try {
+            $sql = "INSERT INTO {$this->table} (user_id, status) VALUES (?, ?)";
+            $orderId = $this->insert($sql, [$userId, $status], 'is');
+            if (!$orderId) {
+                throw new Exception('Failed to create order');
+            }
+
+            foreach ($items as $item) {
+                $sql = "INSERT INTO {$this->itemsTable} (order_id, product_id, quantity, total_price) 
+                        VALUES (?, ?, ?, ?)";
+                $result = $this->insert($sql, [$orderId, $item['product_id'], $item['quantity'], $item['total_price']], 'iiid');
+                if (!$result) {
+                    throw new Exception('Failed to create order item');
+                }
+            }
+
+            $this->commit();
+            return $orderId;
+        } catch (Exception $e) {
+            $this->rollback();
+            return false;
+        }
     }
 
     /**
@@ -42,9 +61,10 @@ class OrderModel extends BaseModel {
      * @return array Array of orders
      */
     public function getByUser($userId) {
-        $sql = "SELECT o.*, p.name as product_name, p.images as product_images 
+        $sql = "SELECT o.*, oi.product_id, oi.quantity, oi.total_price, p.name as product_name, p.images as product_images 
                 FROM {$this->table} o
-                JOIN products p ON o.product_id = p.id
+                JOIN {$this->itemsTable} oi ON o.id = oi.order_id
+                JOIN products p ON oi.product_id = p.id
                 WHERE o.user_id = ?
                 ORDER BY o.created_at DESC";
         return $this->select($sql, [$userId], 'i');
@@ -57,9 +77,10 @@ class OrderModel extends BaseModel {
      * @return array Array of orders
      */
     public function getByStatus($status) {
-        $sql = "SELECT o.*, p.name as product_name, u.username, u.email 
+        $sql = "SELECT o.*, oi.product_id, oi.quantity, oi.total_price, p.name as product_name, u.username, u.email 
                 FROM {$this->table} o
-                JOIN products p ON o.product_id = p.id
+                JOIN {$this->itemsTable} oi ON o.id = oi.order_id
+                JOIN products p ON oi.product_id = p.id
                 JOIN users u ON o.user_id = u.id
                 WHERE o.status = ?
                 ORDER BY o.created_at DESC";
@@ -73,10 +94,11 @@ class OrderModel extends BaseModel {
      * @return array|null Order details or null if not found
      */
     public function getDetails($id) {
-        $sql = "SELECT o.*, p.name as product_name, p.description as product_description, 
+        $sql = "SELECT o.*, oi.product_id, oi.quantity, oi.total_price, p.name as product_name, p.description as product_description, 
                 p.images as product_images, u.username, u.email, u.phone
                 FROM {$this->table} o
-                JOIN products p ON o.product_id = p.id
+                JOIN {$this->itemsTable} oi ON o.id = oi.order_id
+                JOIN products p ON oi.product_id = p.id
                 JOIN users u ON o.user_id = u.id
                 WHERE o.id = ?";
         $result = $this->select($sql, [$id], 'i');
@@ -110,9 +132,10 @@ class OrderModel extends BaseModel {
             $types .= 's';
         }
         
-        $sql = "SELECT o.*, p.name as product_name, u.username 
+        $sql = "SELECT o.*, oi.product_id, oi.quantity, oi.total_price, p.name as product_name, u.username 
                 FROM {$this->table} o
-                JOIN products p ON o.product_id = p.id
+                JOIN {$this->itemsTable} oi ON o.id = oi.order_id
+                JOIN products p ON oi.product_id = p.id
                 JOIN users u ON o.user_id = u.id";
         $countSql = "SELECT COUNT(*) as count FROM {$this->table} o";
         
@@ -155,13 +178,14 @@ class OrderModel extends BaseModel {
     public function getStatistics() {
         $sql = "SELECT 
                 COUNT(*) as total_orders,
-                SUM(total_price) as total_revenue,
-                COUNT(DISTINCT user_id) as total_customers,
+                SUM(oi.total_price) as total_revenue,
+                COUNT(DISTINCT o.user_id) as total_customers,
                 (SELECT COUNT(*) FROM {$this->table} WHERE status = 'pending') as pending_orders,
                 (SELECT COUNT(*) FROM {$this->table} WHERE status = 'shipped') as shipped_orders,
                 (SELECT COUNT(*) FROM {$this->table} WHERE status = 'delivered') as delivered_orders,
                 (SELECT COUNT(*) FROM {$this->table} WHERE status = 'cancelled') as cancelled_orders
-                FROM {$this->table}";
+                FROM {$this->table} o
+                JOIN {$this->itemsTable} oi ON o.id = oi.order_id";
         $result = $this->select($sql);
         return $result[0] ?? [
             'total_orders' => 0,
@@ -173,4 +197,4 @@ class OrderModel extends BaseModel {
             'cancelled_orders' => 0
         ];
     }
-} 
+}
