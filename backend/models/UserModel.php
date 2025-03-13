@@ -19,9 +19,10 @@ class UserModel extends BaseModel {
      * @param string $phone Phone number
      * @param string $password Password (will be hashed)
      * @param array $roleIds Array of role IDs (default: customer role)
+     * @param string|null $avatar User's profile picture URL
      * @return int|false User ID or false on failure
      */
-    public function create($username, $email, $phone, $password, $roleIds = null) {
+    public function create($username, $email, $phone, $password, $roleIds = null, $avatar = null) {
         // Check if email already exists
         if ($this->findByEmail($email)) {
             return false;
@@ -32,10 +33,10 @@ class UserModel extends BaseModel {
 
         try {
             // Insert user
-            $sql = "INSERT INTO {$this->table} (username, email, phone, password) 
-                    VALUES (?, ?, ?, ?)";
+            $sql = "INSERT INTO {$this->table} (username, email, phone, password, avatar) 
+                    VALUES (?, ?, ?, ?, ?)";
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $userId = $this->insert($sql, [$username, $email, $phone, $hashedPassword]);
+            $userId = $this->insert($sql, [$username, $email, $phone, $hashedPassword, $avatar]);
 
             if (!$userId) {
                 throw new Exception("Failed to create user");
@@ -92,12 +93,12 @@ class UserModel extends BaseModel {
      * Update user profile
      * 
      * @param int $id User ID
-     * @param array $data Data to update (username, email, phone)
+     * @param array $data Data to update (username, email, phone, avatar)
      * @return bool True on success, false on failure
      */
     public function updateProfile($id, $data) {
         // Only allow these fields to be updated by regular users
-        $allowedFields = ['username', 'email', 'phone'];
+        $allowedFields = ['username', 'email', 'phone', 'avatar'];
         $updates = [];
         $params = [];
         $types = '';
@@ -125,12 +126,12 @@ class UserModel extends BaseModel {
      * Update user profile by admin
      * 
      * @param int $id User ID
-     * @param array $data Data to update (username, email, phone, is_active)
+     * @param array $data Data to update (username, email, phone, avatar, is_active)
      * @return bool True on success, false on failure
      */
     public function updateProfileByAdmin($id, $data) {
         // Admins can update these additional fields
-        $allowedFields = ['username', 'email', 'phone', 'is_active'];
+        $allowedFields = ['username', 'email', 'phone', 'avatar', 'is_active'];
         $updates = [];
         $params = [];
         $types = '';

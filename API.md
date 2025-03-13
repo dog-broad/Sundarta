@@ -76,11 +76,12 @@ curl -X POST "http://localhost/sundarta/api/users/register" \
     "email": "newuser@example.com",
     "phone": "1234567890",
     "password": "password123",
+    "avatar": "https://example.com/avatars/default.jpg",
     "roles": ["customer", "seller"]
   }'
 ```
 
-Note: The `roles` field is optional. If not provided, the user will be assigned the "customer" role by default. You can specify roles by name (recommended) or by ID (for backward compatibility).
+Note: The `roles` and `avatar` fields are optional. If not provided, the user will be assigned the "customer" role by default. You can specify roles by name (recommended) or by ID (for backward compatibility).
 
 ### Get User Profile
 
@@ -99,7 +100,8 @@ curl -X PUT "http://localhost/sundarta/api/users/profile" \
   -d '{
     "username": "updatedusername",
     "email": "updated@example.com",
-    "phone": "9876543210"
+    "phone": "9876543210",
+    "avatar": "https://example.com/avatars/user123.jpg"
   }'
 ```
 
@@ -154,6 +156,7 @@ curl -X PUT "http://localhost/sundarta/api/users/detail?id=1" \
     "username": "updatedusername",
     "email": "updated@example.com",
     "phone": "9876543210",
+    "avatar": "https://example.com/avatars/user123.jpg",
     "is_active": true,
     "roles": ["customer", "seller"]
   }'

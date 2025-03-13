@@ -182,4 +182,28 @@ Still need to:
 - Make the error handling better (because users do weird things)
 - Write some tests (I promise I'll do it... eventually)
 
+## Profile Picture Implementation
+
+Realized I completely forgot to add a profile picture field to the users table. How did I miss something so basic? Probably because I was too focused on the complex role-based access control system (which, let's be honest, is overkill for this project, but it was fun to build).
+
+Added the `avatar` field to the users table:
+```sql
+ALTER TABLE users ADD COLUMN avatar VARCHAR(255) DEFAULT NULL COMMENT 'User profile picture URL';
+```
+
+Updated the UserModel.php to handle the avatar field:
+- Modified the `create` method to accept an avatar parameter
+- Updated the `updateProfile` and `updateProfileByAdmin` methods to include avatar in the allowed fields
+
+Updated the UserController.php to handle avatar uploads and retrieval:
+- Modified the `register` method to include the avatar field in the user creation process
+- The avatar field is optional, so users can still register without a profile picture
+
+Updated the API documentation to reflect these changes:
+- Added the avatar field to the register, update profile, and update user endpoints
+
+This was a simple change, but it's important for the user experience. Now users can have a profile picture, which makes the site feel more personal and engaging. It's these little details that can make a big difference in how users perceive the site.
+
+Note to self: Always think about the user experience from the beginning. It's easier to add features during the initial development than to retrofit them later.
+
 

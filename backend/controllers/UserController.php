@@ -74,7 +74,8 @@ class UserController extends BaseController {
             $data['email'],
             $data['phone'],
             $data['password'],
-            $roleIds
+            $roleIds,
+            $data['avatar'] ?? null
         );
         
         if (!$userId) {

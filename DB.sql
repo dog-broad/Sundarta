@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,               -- User's email, unique
     phone VARCHAR(15),                                -- User's phone number
     password VARCHAR(255) NOT NULL,                   -- User's password (hashed)
+    avatar VARCHAR(255) DEFAULT NULL,                 -- User's profile picture URL
     is_active BOOLEAN DEFAULT TRUE,                   -- Whether the user is active
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,   -- Timestamp when user is created
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Timestamp when user is updated
