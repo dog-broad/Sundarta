@@ -1,13 +1,16 @@
 <?php
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../models/ServiceModel.php';
+require_once __DIR__ . '/../models/RoleModel.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class ServiceController extends BaseController {
     private $serviceModel;
+    private $roleModel;
 
     public function __construct() {
         $this->serviceModel = new ServiceModel();
+        $this->roleModel = new RoleModel();
     }
 
     /**
@@ -58,9 +61,9 @@ class ServiceController extends BaseController {
         
         requireLogin();
         
-        $userRole = getCurrentUserRole();
-        if ($userRole !== 'seller' && $userRole !== 'admin') {
-            $this->sendError('Only sellers and admins can create services', 403);
+        // Check if user has permission to create services
+        if (!hasPermission('manage_services') && !hasPermission('manage_own_services')) {
+            $this->sendError('You do not have permission to create services', 403);
         }
         
         $data = $this->getJsonData();
@@ -123,10 +126,12 @@ class ServiceController extends BaseController {
         }
         
         $userId = getCurrentUserId();
-        $userRole = getCurrentUserRole();
         
-        // Check if user is the owner or an admin
-        if ($service['user_id'] != $userId && $userRole !== 'admin') {
+        // Check if user has permission to update this service
+        $canManageAllServices = hasPermission('manage_services');
+        $canManageOwnServices = hasPermission('manage_own_services') && $service['user_id'] == $userId;
+        
+        if (!$canManageAllServices && !$canManageOwnServices) {
             $this->sendError('You do not have permission to update this service', 403);
         }
         
@@ -170,10 +175,12 @@ class ServiceController extends BaseController {
         }
         
         $userId = getCurrentUserId();
-        $userRole = getCurrentUserRole();
         
-        // Check if user is the owner or an admin
-        if ($service['user_id'] != $userId && $userRole !== 'admin') {
+        // Check if user has permission to delete this service
+        $canManageAllServices = hasPermission('manage_services');
+        $canManageOwnServices = hasPermission('manage_own_services') && $service['user_id'] == $userId;
+        
+        if (!$canManageAllServices && !$canManageOwnServices) {
             $this->sendError('You do not have permission to delete this service', 403);
         }
         
@@ -244,6 +251,14 @@ class ServiceController extends BaseController {
         if (!$sellerId) {
             $this->sendError('Seller ID is required', 400);
         }
+
+        if (!is_numeric($sellerId)) {
+            $this->sendError('Seller ID must be a number', 400);
+        }
+
+        if (!$this->roleModel->userHasRole($sellerId, 'seller')) {
+            $this->sendError('User is not a seller', 400);
+        }
         
         $services = $this->serviceModel->getBySeller($sellerId);
         
@@ -251,21 +266,26 @@ class ServiceController extends BaseController {
     }
 
     /**
-     * Get services for the current seller
+     * Get my services (for logged in seller)
      */
     public function getMyServices() {
         $this->ensureMethodAllowed('GET');
         
         requireLogin();
         
-        $userRole = getCurrentUserRole();
-        if ($userRole !== 'seller' && $userRole !== 'admin') {
-            $this->sendError('Only sellers and admins can access this endpoint', 403);
+        // Check if user has permission to manage services
+        if (!hasPermission('manage_own_services') && !hasPermission('manage_services')) {
+            $this->sendError('You do not have permission to view your services', 403);
         }
         
         $userId = getCurrentUserId();
-        $services = $this->serviceModel->getBySeller($userId);
         
-        $this->sendSuccess($services, 'Your services retrieved successfully');
+        $pagination = $this->getPaginationParams();
+        $page = $pagination['page'];
+        $perPage = $pagination['per_page'];
+        
+        $result = $this->serviceModel->getByUserId($userId, $page, $perPage);
+        
+        $this->sendSuccess($result, 'Services retrieved successfully');
     }
 } 

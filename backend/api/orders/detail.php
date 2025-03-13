@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Handle different request methods
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $controller = new OrderController();
-    $controller->getOrder();
+    $controller->getOrderDetails();
 } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $controller = new OrderController();
     $controller->updateOrderStatus();

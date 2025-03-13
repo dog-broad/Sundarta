@@ -98,7 +98,9 @@ class ReviewController extends BaseController {
             $this->sendError('Failed to create review', 500);
         }
         
-        $this->sendSuccess(['id' => $reviewId], 'Review created successfully', 201);
+        $review = $this->reviewModel->getById($reviewId);
+        
+        $this->sendSuccess($review, 'Review created successfully', 201);
     }
 
     /**
@@ -162,31 +164,46 @@ class ReviewController extends BaseController {
             $this->sendError('Review ID is required', 400);
         }
         
-        $data = $this->getJsonData();
+        $review = $this->reviewModel->getById($id);
         
-        // Validate required fields
-        $requiredFields = ['rating', 'review'];
-        $missingFields = $this->validateRequired($data, $requiredFields);
-        
-        if (!empty($missingFields)) {
-            $this->sendError('Missing required fields', 400, [
-                'missing_fields' => $missingFields
-            ]);
+        if (!$review) {
+            $this->sendError('Review not found', 404);
         }
         
-        // Validate rating
-        if ($data['rating'] < 1 || $data['rating'] > 5) {
+        $userId = getCurrentUserId();
+        
+        // Check if user has permission to update this review
+        $canManageAllReviews = hasPermission('manage_reviews');
+        $isOwner = $review['user_id'] == $userId;
+        
+        if (!$canManageAllReviews && !$isOwner) {
+            $this->sendError('You do not have permission to update this review', 403);
+        }
+        
+        $data = $this->getJsonData();
+        
+        // Validate rating if provided
+        if (isset($data['rating']) && ($data['rating'] < 1 || $data['rating'] > 5)) {
             $this->sendError('Rating must be between 1 and 5', 400);
+        }
+
+        // validate review if provided
+        if (isset($data['review'])) {
+            if (strlen($data['review']) > 5000) {
+                $this->sendError('Review must be less than 5000 characters', 400);
+            }
         }
         
         // Update review
-        $success = $this->reviewModel->update($id, $data['rating'], $data['review']);
+        $success = $this->reviewModel->update($id, $data['rating'] ?? $review['rating'], $data['review'] ?? $review['review']);
         
         if (!$success) {
             $this->sendError('Failed to update review', 500);
         }
         
-        $this->sendSuccess([], 'Review updated successfully');
+        $updatedReview = $this->reviewModel->getById($id);
+        
+        $this->sendSuccess($updatedReview, 'Review updated successfully');
     }
 
     /**
@@ -203,6 +220,22 @@ class ReviewController extends BaseController {
             $this->sendError('Review ID is required', 400);
         }
         
+        $review = $this->reviewModel->getById($id);
+        
+        if (!$review) {
+            $this->sendError('Review not found', 404);
+        }
+        
+        $userId = getCurrentUserId();
+        
+        // Check if user has permission to delete this review
+        $canManageAllReviews = hasPermission('manage_reviews');
+        $isOwner = $review['user_id'] == $userId;
+        
+        if (!$canManageAllReviews && !$isOwner) {
+            $this->sendError('You do not have permission to delete this review', 403);
+        }
+        
         // Delete review
         $success = $this->reviewModel->deleteById($id);
         
@@ -214,7 +247,7 @@ class ReviewController extends BaseController {
     }
 
     /**
-     * Get reviews by user
+     * Get reviews by the current user
      */
     public function getMyReviews() {
         $this->ensureMethodAllowed('GET');

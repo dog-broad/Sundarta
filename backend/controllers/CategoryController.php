@@ -54,7 +54,7 @@ class CategoryController extends BaseController {
     public function createCategory() {
         $this->ensureMethodAllowed('POST');
         
-        requireAdmin();
+        requirePermission('manage_categories');
         
         $data = $this->getJsonData();
         
@@ -86,7 +86,7 @@ class CategoryController extends BaseController {
     public function updateCategory() {
         $this->ensureMethodAllowed('PUT');
         
-        requireAdmin();
+        requirePermission('manage_categories');
         
         $id = $this->getQueryParam('id');
         
@@ -125,7 +125,7 @@ class CategoryController extends BaseController {
     public function deleteCategory() {
         $this->ensureMethodAllowed('DELETE');
         
-        requireAdmin();
+        requirePermission('manage_categories');
         
         $id = $this->getQueryParam('id');
         

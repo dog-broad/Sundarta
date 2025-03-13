@@ -29,6 +29,27 @@ class CartModel extends BaseModel {
     }
 
     /**
+     * Add a service to the cart
+     * 
+     * @param int $userId User ID
+     * @param int $serviceId Service ID
+     * @param int $quantity Quantity
+     * @return int|false Cart item ID or false on failure
+     */
+    public function addServiceItem($userId, $serviceId, $quantity = 1) {
+        // Check if service already exists in cart
+        $existingItem = $this->getCartServiceItem($userId, $serviceId);
+        
+        if ($existingItem) {
+            // Update quantity instead of adding new item
+            return $this->updateQuantity($existingItem['id'], $existingItem['quantity'] + $quantity);
+        }
+        
+        $sql = "INSERT INTO {$this->table} (user_id, service_id, quantity) VALUES (?, ?, ?)";
+        return $this->insert($sql, [$userId, $serviceId, $quantity], 'iii');
+    }
+
+    /**
      * Update cart item quantity
      * 
      * @param int $id Cart item ID
@@ -52,13 +73,24 @@ class CartModel extends BaseModel {
      * @return array Array of cart items with product details
      */
     public function getByUser($userId) {
-        $sql = "SELECT c.*, p.name, p.price, p.images, p.stock,
-                (c.quantity * p.price) as subtotal
+        // Get product items
+        $productSql = "SELECT c.*, p.name, p.price, p.images, p.stock,
+                (c.quantity * p.price) as subtotal, 'product' as item_type
                 FROM {$this->table} c
                 JOIN products p ON c.product_id = p.id
-                WHERE c.user_id = ?
-                ORDER BY c.created_at DESC";
-        return $this->select($sql, [$userId], 'i');
+                WHERE c.user_id = ? AND c.product_id IS NOT NULL";
+        $productItems = $this->select($productSql, [$userId], 'i');
+        
+        // Get service items
+        $serviceSql = "SELECT c.*, s.name, s.price, s.images,
+                (c.quantity * s.price) as subtotal, 'service' as item_type
+                FROM {$this->table} c
+                JOIN services s ON c.service_id = s.id
+                WHERE c.user_id = ? AND c.service_id IS NOT NULL";
+        $serviceItems = $this->select($serviceSql, [$userId], 'i');
+        
+        // Combine and return all items
+        return array_merge($productItems, $serviceItems);
     }
 
     /**
@@ -71,6 +103,19 @@ class CartModel extends BaseModel {
     public function getCartItem($userId, $productId) {
         $sql = "SELECT * FROM {$this->table} WHERE user_id = ? AND product_id = ?";
         $result = $this->select($sql, [$userId, $productId], 'ii');
+        return $result[0] ?? null;
+    }
+
+    /**
+     * Get a specific cart service item
+     * 
+     * @param int $userId User ID
+     * @param int $serviceId Service ID
+     * @return array|null Cart item or null if not found
+     */
+    public function getCartServiceItem($userId, $serviceId) {
+        $sql = "SELECT * FROM {$this->table} WHERE user_id = ? AND service_id = ?";
+        $result = $this->select($sql, [$userId, $serviceId], 'ii');
         return $result[0] ?? null;
     }
 
@@ -92,17 +137,37 @@ class CartModel extends BaseModel {
      * @return array Cart summary (total items, total price)
      */
     public function getCartSummary($userId) {
-        $sql = "SELECT 
-                SUM(c.quantity) as total_items,
-                SUM(c.quantity * p.price) as total_price
+        // Get product totals
+        $productSql = "SELECT 
+                SUM(c.quantity) as product_items,
+                SUM(c.quantity * p.price) as product_price
                 FROM {$this->table} c
                 JOIN products p ON c.product_id = p.id
-                WHERE c.user_id = ?";
-        $result = $this->select($sql, [$userId], 'i');
+                WHERE c.user_id = ? AND c.product_id IS NOT NULL";
+        $productResult = $this->select($productSql, [$userId], 'i');
+        
+        // Get service totals
+        $serviceSql = "SELECT 
+                SUM(c.quantity) as service_items,
+                SUM(c.quantity * s.price) as service_price
+                FROM {$this->table} c
+                JOIN services s ON c.service_id = s.id
+                WHERE c.user_id = ? AND c.service_id IS NOT NULL";
+        $serviceResult = $this->select($serviceSql, [$userId], 'i');
+        
+        // Calculate totals
+        $productItems = (int)($productResult[0]['product_items'] ?? 0);
+        $productPrice = (float)($productResult[0]['product_price'] ?? 0);
+        $serviceItems = (int)($serviceResult[0]['service_items'] ?? 0);
+        $servicePrice = (float)($serviceResult[0]['service_price'] ?? 0);
         
         return [
-            'total_items' => (int)($result[0]['total_items'] ?? 0),
-            'total_price' => (float)($result[0]['total_price'] ?? 0)
+            'total_items' => $productItems + $serviceItems,
+            'total_price' => $productPrice + $servicePrice,
+            'product_items' => $productItems,
+            'product_price' => $productPrice,
+            'service_items' => $serviceItems,
+            'service_price' => $servicePrice
         ];
     }
 
@@ -116,7 +181,7 @@ class CartModel extends BaseModel {
         $sql = "SELECT c.*, p.name, p.stock
                 FROM {$this->table} c
                 JOIN products p ON c.product_id = p.id
-                WHERE c.user_id = ? AND c.quantity > p.stock";
+                WHERE c.user_id = ? AND c.product_id IS NOT NULL AND c.quantity > p.stock";
         return $this->select($sql, [$userId], 'i');
     }
 } 

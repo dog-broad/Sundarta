@@ -2,17 +2,20 @@
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../models/OrderModel.php';
 require_once __DIR__ . '/../models/ProductModel.php';
+require_once __DIR__ . '/../models/ServiceModel.php';
 require_once __DIR__ . '/../models/CartModel.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class OrderController extends BaseController {
     private $orderModel;
     private $productModel;
+    private $serviceModel;
     private $cartModel;
 
     public function __construct() {
         $this->orderModel = new OrderModel();
         $this->productModel = new ProductModel();
+        $this->serviceModel = new ServiceModel();
         $this->cartModel = new CartModel();
     }
 
@@ -22,7 +25,7 @@ class OrderController extends BaseController {
     public function getAllOrders() {
         $this->ensureMethodAllowed('GET');
         
-        requireAdmin();
+        requirePermission('view_orders');
         
         $pagination = $this->getPaginationParams();
         $page = $pagination['page'];
@@ -37,9 +40,9 @@ class OrderController extends BaseController {
     }
 
     /**
-     * Get an order by ID
+     * Get order details
      */
-    public function getOrder() {
+    public function getOrderDetails() {
         $this->ensureMethodAllowed('GET');
         
         requireLogin();
@@ -50,21 +53,24 @@ class OrderController extends BaseController {
             $this->sendError('Order ID is required', 400);
         }
         
-        $order = $this->orderModel->getDetails($id);
+        $order = $this->orderModel->getById($id);
         
         if (!$order) {
             $this->sendError('Order not found', 404);
         }
         
+        // Check if user has permission to view this order
         $userId = getCurrentUserId();
-        $userRole = getCurrentUserRole();
+        $isAdmin = hasPermission('view_orders');
+        $isOwner = $order['user_id'] == $userId && hasPermission('view_own_orders');
         
-        // Check if user is the owner or an admin
-        if ($order['user_id'] != $userId && $userRole !== 'admin') {
+        if (!$isAdmin && !$isOwner) {
             $this->sendError('You do not have permission to view this order', 403);
         }
         
-        $this->sendSuccess($order, 'Order retrieved successfully');
+        $orderDetails = $this->orderModel->getDetails($id);
+        
+        $this->sendSuccess($orderDetails, 'Order details retrieved successfully');
     }
 
     /**
@@ -74,6 +80,7 @@ class OrderController extends BaseController {
         $this->ensureMethodAllowed('POST');
         
         requireLogin();
+        requirePermission('place_orders');
         
         $data = $this->getJsonData();
         
@@ -88,28 +95,48 @@ class OrderController extends BaseController {
         }
         
         $userId = getCurrentUserId();
-        $items = $data['items']; // Array of items, each containing product_id, quantity
+        $items = $data['items']; // Array of items, each containing product_id or service_id, quantity
         
         // Validate each item in the order
         $validatedItems = [];
         foreach ($items as $item) {
-            if (!isset($item['product_id'], $item['quantity'])) {
-                $this->sendError('Product ID and quantity are required for each item', 400);
-            }
+            if (isset($item['product_id'])) {
+                // Product item
+                if (!isset($item['quantity'])) {
+                    $this->sendError('Quantity is required for each item', 400);
+                }
 
-            $product = $this->productModel->getById($item['product_id']);
-            
-            if (!$product) {
-                $this->sendError('Product not found', 404);
-            }
-            
-            if ($product['stock'] < $item['quantity']) {
-                $this->sendError('Not enough stock for product ' . $item['product_id'], 400);
-            }
+                $product = $this->productModel->getById($item['product_id']);
+                
+                if (!$product) {
+                    $this->sendError('Product not found', 404);
+                }
+                
+                if ($product['stock'] < $item['quantity']) {
+                    $this->sendError('Not enough stock for product ' . $item['product_id'], 400);
+                }
 
-            // Calculate total price for the item
-            $item['total_price'] = $product['price'] * $item['quantity'];
-            $validatedItems[] = $item;
+                // Calculate total price for the item
+                $item['total_price'] = $product['price'] * $item['quantity'];
+                $validatedItems[] = $item;
+            } elseif (isset($item['service_id'])) {
+                // Service item
+                if (!isset($item['quantity'])) {
+                    $this->sendError('Quantity is required for each item', 400);
+                }
+
+                $service = $this->serviceModel->getById($item['service_id']);
+                
+                if (!$service) {
+                    $this->sendError('Service not found', 404);
+                }
+
+                // Calculate total price for the item
+                $item['total_price'] = $service['price'] * $item['quantity'];
+                $validatedItems[] = $item;
+            } else {
+                $this->sendError('Each item must have either product_id or service_id', 400);
+            }
         }
 
         // Create the order
@@ -119,19 +146,16 @@ class OrderController extends BaseController {
             $this->sendError('Failed to create order', 500);
         }
 
-        // Update product stock for each item
+        // Update product stock for product items
         foreach ($validatedItems as $item) {
-            $this->productModel->updateStock($item['product_id'], -$item['quantity']);
+            if (isset($item['product_id'])) {
+                $this->productModel->updateStock($item['product_id'], -$item['quantity']);
+            }
         }
 
         // Clear cart if the order is created from the cart
         if (isset($data['from_cart']) && $data['from_cart']) {
-            foreach ($validatedItems as $item) {
-                $cartItem = $this->cartModel->getCartItem($userId, $item['product_id']);
-                if ($cartItem) {
-                    $this->cartModel->deleteById($cartItem['id']);
-                }
-            }
+            $this->cartModel->clearCart($userId);
         }
 
         // Fetch the created order details
@@ -146,23 +170,12 @@ class OrderController extends BaseController {
     public function updateOrderStatus() {
         $this->ensureMethodAllowed('PUT');
         
-        requireAdmin();
+        requirePermission('manage_orders');
         
         $id = $this->getQueryParam('id');
         
         if (!$id) {
             $this->sendError('Order ID is required', 400);
-        }
-        
-        $data = $this->getJsonData();
-        
-        if (!isset($data['status']) || empty($data['status'])) {
-            $this->sendError('Status is required', 400);
-        }
-        
-        $allowedStatuses = ['pending', 'shipped', 'delivered', 'cancelled'];
-        if (!in_array($data['status'], $allowedStatuses)) {
-            $this->sendError('Invalid status', 400);
         }
         
         $order = $this->orderModel->getById($id);
@@ -171,24 +184,15 @@ class OrderController extends BaseController {
             $this->sendError('Order not found', 404);
         }
         
-        // If cancelling an order, restore stock
-        if ($data['status'] === 'cancelled' && $order['status'] !== 'cancelled') {
-            foreach ($order['items'] as $item) {
-                $this->productModel->updateStock($item['product_id'], $item['quantity']);
-            }
+        $data = $this->getJsonData();
+        
+        if (!isset($data['status'])) {
+            $this->sendError('Status is required', 400);
         }
         
-        // If un-cancelling an order, reduce stock again
-        if ($order['status'] === 'cancelled' && $data['status'] !== 'cancelled') {
-            foreach ($order['items'] as $item) {
-                $product = $this->productModel->getById($item['product_id']);
-                
-                if ($product['stock'] < $item['quantity']) {
-                    $this->sendError('Not enough stock to un-cancel this order', 400);
-                }
-                
-                $this->productModel->updateStock($item['product_id'], -$item['quantity']);
-            }
+        $allowedStatuses = ['pending', 'shipped', 'delivered', 'cancelled'];
+        if (!in_array($data['status'], $allowedStatuses)) {
+            $this->sendError('Invalid status. Allowed values: ' . implode(', ', $allowedStatuses), 400);
         }
         
         // Update order status
@@ -210,11 +214,12 @@ class OrderController extends BaseController {
         $this->ensureMethodAllowed('GET');
         
         requireLogin();
+        requirePermission('view_own_orders');
         
         $userId = getCurrentUserId();
         $orders = $this->orderModel->getByUser($userId);
         
-        $this->sendSuccess($orders, 'Your orders retrieved successfully');
+        $this->sendSuccess($orders, 'Orders retrieved successfully');
     }
 
     /**
@@ -223,7 +228,7 @@ class OrderController extends BaseController {
     public function getOrderStatistics() {
         $this->ensureMethodAllowed('GET');
         
-        requireAdmin();
+        requirePermission('view_orders');
         
         $statistics = $this->orderModel->getStatistics();
         
@@ -231,12 +236,13 @@ class OrderController extends BaseController {
     }
 
     /**
-     * Create orders from cart
+     * Create orders from cart (checkout)
      */
     public function createOrdersFromCart() {
         $this->ensureMethodAllowed('POST');
         
         requireLogin();
+        requirePermission('place_orders');
         
         $userId = getCurrentUserId();
         
@@ -244,44 +250,65 @@ class OrderController extends BaseController {
         $cartItems = $this->cartModel->getByUser($userId);
         
         if (empty($cartItems)) {
-            $this->sendError('Cart is empty', 400);
+            $this->sendError('Your cart is empty', 400);
         }
         
-        // Validate stock for all items
-        $validatedItems = [];
+        // Prepare items for order creation
+        $orderItems = [];
+        
         foreach ($cartItems as $item) {
-            $product = $this->productModel->getById($item['product_id']);
-            
-            if (!$product || $product['stock'] < $item['quantity']) {
-                $this->sendError('Not enough stock for some items', 400);
+            if (isset($item['product_id']) && $item['product_id']) {
+                // Product item
+                $product = $this->productModel->getById($item['product_id']);
+                
+                if (!$product) {
+                    $this->sendError("Product with ID {$item['product_id']} not found", 404);
+                }
+                
+                if ($product['stock'] < $item['quantity']) {
+                    $this->sendError("Not enough stock for product: {$product['name']}", 400);
+                }
+                
+                $orderItems[] = [
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'total_price' => $item['subtotal']
+                ];
+            } elseif (isset($item['service_id']) && $item['service_id']) {
+                // Service item
+                $service = $this->serviceModel->getById($item['service_id']);
+                
+                if (!$service) {
+                    $this->sendError("Service with ID {$item['service_id']} not found", 404);
+                }
+                
+                $orderItems[] = [
+                    'service_id' => $item['service_id'],
+                    'quantity' => $item['quantity'],
+                    'total_price' => $item['subtotal']
+                ];
             }
-            
-            // Calculate total price for the item
-            $item['total_price'] = $product['price'] * $item['quantity'];
-            $validatedItems[] = $item;
         }
-
-        // Create the orders
-        $orderId = $this->orderModel->create($userId, $validatedItems);
+        
+        // Create order
+        $orderId = $this->orderModel->createFromCart($userId, $orderItems);
         
         if (!$orderId) {
-            $this->sendError('Failed to create orders', 500);
+            $this->sendError('Failed to create order', 500);
         }
-
-        // Update product stock for each item
-        foreach ($validatedItems as $item) {
-            $this->productModel->updateStock($item['product_id'], -$item['quantity']);
+        
+        // Update product stock for product items
+        foreach ($orderItems as $item) {
+            if (isset($item['product_id'])) {
+                $this->productModel->updateStock($item['product_id'], -$item['quantity']);
+            }
         }
-
-        // Clear cart after creating orders
+        
+        // Clear cart
         $this->cartModel->clearCart($userId);
         
-        // Fetch the created order details
-        $orders = [];
-        foreach ($validatedItems as $item) {
-            $orders[] = $this->orderModel->getDetails($orderId);
-        }
+        $order = $this->orderModel->getDetails($orderId);
         
-        $this->sendSuccess($orders, 'Orders created successfully', 201);
+        $this->sendSuccess($order, 'Order created successfully', 201);
     }
 }

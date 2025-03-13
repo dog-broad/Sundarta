@@ -55,7 +55,7 @@ class ProductController extends BaseController {
     public function createProduct() {
         $this->ensureMethodAllowed('POST');
         
-        requireAdmin();
+        requirePermission('manage_products');
         
         $data = $this->getJsonData();
         
@@ -101,7 +101,7 @@ class ProductController extends BaseController {
     public function updateProduct() {
         $this->ensureMethodAllowed('PUT');
         
-        requireAdmin();
+        requirePermission('manage_products');
         
         $id = $this->getQueryParam('id');
         
@@ -140,7 +140,7 @@ class ProductController extends BaseController {
     public function deleteProduct() {
         $this->ensureMethodAllowed('DELETE');
         
-        requireAdmin();
+        requirePermission('manage_products');
         
         $id = $this->getQueryParam('id');
         
@@ -208,43 +208,5 @@ class ProductController extends BaseController {
         $products = $this->productModel->getByCategory($categoryId);
         
         $this->sendSuccess($products, 'Products by category retrieved successfully');
-    }
-
-    /**
-     * Update product stock (admin only)
-     */
-    public function updateStock() {
-        $this->ensureMethodAllowed('PUT');
-        
-        requireAdmin();
-        
-        $id = $this->getQueryParam('id');
-        
-        if (!$id) {
-            $this->sendError('Product ID is required', 400);
-        }
-        
-        $data = $this->getJsonData();
-        
-        if (!isset($data['quantity'])) {
-            $this->sendError('Quantity is required', 400);
-        }
-        
-        $product = $this->productModel->getById($id);
-        
-        if (!$product) {
-            $this->sendError('Product not found', 404);
-        }
-        
-        // Update stock
-        $success = $this->productModel->updateStock($id, $data['quantity']);
-        
-        if (!$success) {
-            $this->sendError('Failed to update stock', 500);
-        }
-        
-        $updatedProduct = $this->productModel->getById($id);
-        
-        $this->sendSuccess($updatedProduct, 'Stock updated successfully');
     }
 } 

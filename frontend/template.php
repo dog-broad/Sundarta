@@ -181,8 +181,8 @@ require 'partials/header.php';
                 <p class="text-text-light">This is a basic card component that can be used for various content.</p>
             </div>
             
-            <!-- Product Card -->
-            <div class="card-product">
+            <!-- Product Card (Single Image) -->
+            <div class="card card-product">
                 <img src="https://hips.hearstapps.com/hmg-prod/images/ghk-digital-index-haircolor-449-640a4807297b5.jpg?crop=0.668xw:1.00xh;0.167xw,0&resize=480:*" alt="Product" class="card-product-image">
                 <div class="card-product-body">
                     <span class="badge badge-primary mb-2">New</span>
@@ -205,12 +205,83 @@ require 'partials/header.php';
                 </div>
             </div>
             
-            <!-- Special Offer Card -->
-            <div class="card bg-primary text-black">
-                <div class="rangoli-decor mb-4"></div>
-                <h3 class="font-heading text-xl mb-2">Special Offer</h3>
-                <p class="mb-4">Get 20% off on all Ayurvedic products!</p>
-                <button class="btn bg-white text-primary hover:bg-sand-light transition-colors">Shop Now</button>
+            <!-- Product Card (Multiple Images) -->
+            <div class="card card-product">
+                <div class="product-gallery">
+                    <div class="product-gallery-container">
+                        <img src="https://img.freepik.com/free-vector/makeup-packaging-background_1268-1384.jpg" alt="Product" class="product-gallery-image">
+                        <img src="https://www.fbscosmetics.com/wp-content/uploads/2024/05/super-set-sqaure-optimized.webp" alt="Product" class="product-gallery-image">
+                        <img src="https://img.freepik.com/premium-photo/collection-beauty-products-with-copy-space_521733-10072.jpg" alt="Product" class="product-gallery-image">
+                    </div>
+                    <div class="product-gallery-prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </div>
+                    <div class="product-gallery-next">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="product-gallery-nav"></div>
+                </div>
+                <div class="card-product-body">
+                    <span class="badge badge-primary mb-2">Featured</span>
+                    <h3 class="font-heading text-lg mb-1">Multi-Image Product</h3>
+                    <p class="text-text-light text-sm mb-2">Product with multiple images. Click arrows or dots to navigate.</p>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-primary">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-xs ml-1">(5.0)</span>
+                    </div>
+                </div>
+                <div class="card-product-footer flex justify-between items-center">
+                    <span class="font-semibold">₹1,899.00</span>
+                    <button class="btn btn-primary py-1 px-3 text-sm">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Multi-Image Product Card Example -->
+        <div class="mt-8">
+            <h3 class="font-heading text-xl mb-4">Multi-Image Product Card (Full Width)</h3>
+            <div class="card card-product max-w-2xl mx-auto">
+                <div class="product-gallery">
+                    <div class="product-gallery-container">
+                        <img src="https://img.freepik.com/free-vector/makeup-packaging-background_1268-1384.jpg" alt="Product" class="product-gallery-image">
+                        <img src="https://www.fbscosmetics.com/wp-content/uploads/2024/05/super-set-sqaure-optimized.webp" alt="Product" class="product-gallery-image">
+                        <img src="https://img.freepik.com/premium-photo/collection-beauty-products-with-copy-space_521733-10072.jpg" alt="Product" class="product-gallery-image">
+                    </div>
+                    <div class="product-gallery-prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </div>
+                    <div class="product-gallery-next">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="product-gallery-nav"></div>
+                </div>
+                <div class="card-product-body">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="badge badge-secondary mb-2">Limited Edition</span>
+                            <h3 class="font-heading text-xl mb-1">Ayurvedic Beauty Set</h3>
+                        </div>
+                        <span class="text-xl font-semibold text-primary">₹2,499.00</span>
+                    </div>
+                    <p class="text-text-light mb-4">Complete Ayurvedic skincare routine with four essential products. Made with traditional herbs and natural ingredients.</p>
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-primary">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="text-sm ml-2">(4.5) 128 reviews</span>
+                    </div>
+                    <button class="btn btn-primary w-full">Add to Cart</button>
+                </div>
             </div>
         </div>
     </section>
@@ -373,7 +444,7 @@ require 'partials/header.php';
             </div>
             
             <div class="card text-center p-6">
-                <div class="border-glow">
+                <div class="border-glow rounded-md p-2">
                     <i class="fas fa-magic text-4xl text-primary mb-4"></i>
                     <h3 class="font-heading text-lg mb-2">Border Glow</h3>
                     <p class="text-sm text-text-light">Elements with glowing borders.</p>
