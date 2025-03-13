@@ -1,268 +1,128 @@
-# Sundarta - Beauty and Wellness E-Commerce Site
+# 🌸 Sundarta - Beauty & Wellness E-Commerce Site 🌿
 
-Sundarta is a beauty and wellness e-commerce platform that allows users to browse and purchase beauty products and book wellness services.
+Welcome to Sundarta, an elegant and user-friendly platform where you can explore and purchase a wide range of beauty products and book rejuvenating wellness services. Indulge yourself in the art of self-care.
 
 ## Tech Stack
 
-- HTML
-- CSS (Tailwind)
-- JavaScript
-- PHP
-- MySQL
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-plain-wordmark.svg" width="50" height="50"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-plain-wordmark.svg" width="50" height="50"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" width="50" height="50"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-plain.svg" width="50" height="50"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg" width="50" height="50"/>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-plain-wordmark.svg" width="50" height="50"/>
+</div>
+
 
 ## Installation
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/sundarta.git
-   ```
-
-2. Navigate to the project directory:
-   ```
-   cd sundarta
-   ```
-
-3. Install dependencies:
-   ```
-   composer install
-   ```
-
-4. Create a `.env` file in the root directory with the following content:
-   ```
-   DB_USER=your_db_username
-   DB_PASS=your_db_password
-   APP_ENV=development
-   APP_TIMEZONE=Asia/Kolkata
-   ```
-
-5. Import the database schema:
-   ```
-   mysql -u your_db_username -p sundarta_db < DB.sql
-   ```
-
-6. Start the server:
-   ```
-   php -S localhost:8000
-   ```
+Follow these steps to set up the application locally and test it.
 
-7. Open your browser and navigate to `http://localhost:8000`
-
-## API Endpoints
+### 1. Clone the repository
 
-### Users
-
-- **POST /api/users/register** - Register a new user
-  - Request: `{ "username": "string", "email": "string", "phone": "string", "password": "string", "role": "string" }`
-  - Response: `{ "success": true, "message": "User registered successfully", "data": { "id": "number", "username": "string", "email": "string", "phone": "string", "role": "string" } }`
-
-- **POST /api/users/login** - Login a user
-  - Request: `{ "email": "string", "password": "string" }`
-  - Response: `{ "success": true, "message": "Login successful", "data": { "user_id": "number", "username": "string", "role": "string" } }`
-
-- **POST /api/users/logout** - Logout a user
-  - Response: `{ "success": true, "message": "Logout successful" }`
+Clone the repository to your local machine using Git:
 
-- **GET /api/users/profile** - Get user profile
-  - Response: `{ "success": true, "message": "Profile retrieved successfully", "data": { "id": "number", "username": "string", "email": "string", "phone": "string", "role": "string" } }`
+```bash
+git clone https://github.com/yourusername/sundarta.git
+```
 
-- **PUT /api/users/profile** - Update user profile
-  - Request: `{ "username": "string", "email": "string", "phone": "string" }`
-  - Response: `{ "success": true, "message": "Profile updated successfully", "data": { "id": "number", "username": "string", "email": "string", "phone": "string", "role": "string" } }`
+### 2. Navigate to the project directory
 
-- **PUT /api/users/password** - Update user password
-  - Request: `{ "current_password": "string", "new_password": "string" }`
-  - Response: `{ "success": true, "message": "Password updated successfully" }`
+Move into the project directory:
 
-- **GET /api/users/list** - Get all users (admin only)
-  - Query Parameters: `page`, `per_page`, `role`
-  - Response: `{ "success": true, "message": "Users retrieved successfully", "data": { "users": [...], "pagination": { ... } } }`
+```bash
+cd sundarta
+```
 
-### Products
+### 3. Install Dependencies
 
-- **GET /api/products** - Get all products
-  - Query Parameters: `page`, `per_page`, `category`, `search`
-  - Response: `{ "success": true, "message": "Products retrieved successfully", "data": { "products": [...], "pagination": { ... } } }`
+Make sure you have Composer installed. If not, you can install it by following the instructions on the [Composer website](https://getcomposer.org/download/).
 
-- **POST /api/products** - Create a new product (admin only)
-  - Request: `{ "name": "string", "description": "string", "price": "number", "stock": "number", "category": "number", "images": "array" }`
-  - Response: `{ "success": true, "message": "Product created successfully", "data": { ... } }`
+Install all the PHP dependencies:
 
-- **GET /api/products/detail** - Get a product by ID
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Product retrieved successfully", "data": { ... } }`
+```bash
+composer install
+```
 
-- **PUT /api/products/detail** - Update a product (admin only)
-  - Query Parameters: `id`
-  - Request: `{ "name": "string", "description": "string", "price": "number", "stock": "number", "category": "number", "images": "array" }`
-  - Response: `{ "success": true, "message": "Product updated successfully", "data": { ... } }`
+### 4. Set Up Environment File
 
-- **DELETE /api/products/detail** - Delete a product (admin only)
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Product deleted successfully" }`
+Copy the `.env.example` file to `.env` (if not already present):
 
-- **GET /api/products/featured** - Get featured products
-  - Query Parameters: `limit`
-  - Response: `{ "success": true, "message": "Featured products retrieved successfully", "data": [...] }`
+```bash
+cp .env.example .env
+```
 
-- **GET /api/products/search** - Search products
-  - Query Parameters: `query`
-  - Response: `{ "success": true, "message": "Products search results", "data": [...] }`
+Alternatively, create a new `.env` file in the root directory with the following content (replace `your_db_username` and `your_db_password` with your own database credentials):
 
-- **GET /api/products/category** - Get products by category
-  - Query Parameters: `category_id`
-  - Response: `{ "success": true, "message": "Products by category retrieved successfully", "data": [...] }`
+```
+DB_USER=your_db_username
+DB_PASS=your_db_password
+APP_ENV=development
+APP_TIMEZONE=Asia/Kolkata
+```
 
-- **PUT /api/products/stock** - Update product stock (admin only)
-  - Query Parameters: `id`
-  - Request: `{ "quantity": "number" }`
-  - Response: `{ "success": true, "message": "Stock updated successfully", "data": { ... } }`
+### 5. Import the Database Schema
 
-### Services
+Make sure MySQL is installed on your system. If you're on Windows, you can use a local MySQL server (like XAMPP or WAMP), and on Linux, you should have MySQL or MariaDB installed.
 
-- **GET /api/services** - Get all services
-  - Query Parameters: `page`, `per_page`, `category`, `user_id`, `search`
-  - Response: `{ "success": true, "message": "Services retrieved successfully", "data": { "services": [...], "pagination": { ... } } }`
+Create a new database in MySQL:
 
-- **POST /api/services** - Create a new service (seller or admin only)
-  - Request: `{ "name": "string", "description": "string", "price": "number", "category": "number", "images": "array" }`
-  - Response: `{ "success": true, "message": "Service created successfully", "data": { ... } }`
+```bash
+mysql -u root -p
+CREATE DATABASE sundarta_db;
+```
 
-- **GET /api/services/detail** - Get a service by ID
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Service retrieved successfully", "data": { ... } }`
+Then import the database schema:
 
-- **PUT /api/services/detail** - Update a service (owner or admin only)
-  - Query Parameters: `id`
-  - Request: `{ "name": "string", "description": "string", "price": "number", "category": "number", "images": "array" }`
-  - Response: `{ "success": true, "message": "Service updated successfully", "data": { ... } }`
+```bash
+mysql -u your_db_username -p sundarta_db < DB.sql
+```
 
-- **DELETE /api/services/detail** - Delete a service (owner or admin only)
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Service deleted successfully" }`
+### 6. Start the PHP Built-in Server (Local Testing)
 
-- **GET /api/services/featured** - Get featured services
-  - Query Parameters: `limit`
-  - Response: `{ "success": true, "message": "Featured services retrieved successfully", "data": [...] }`
+For testing the application locally, PHP provides a built-in server. Run the following command to start the server on `localhost:8000`:
 
-- **GET /api/services/search** - Search services
-  - Query Parameters: `query`
-  - Response: `{ "success": true, "message": "Services search results", "data": [...] }`
+```bash
+php -S localhost:8000
+```
 
-- **GET /api/services/category** - Get services by category
-  - Query Parameters: `category_id`
-  - Response: `{ "success": true, "message": "Services by category retrieved successfully", "data": [...] }`
+You can now access the application in your browser by navigating to `http://localhost:8000`.
 
-- **GET /api/services/seller** - Get services by seller
-  - Query Parameters: `seller_id`
-  - Response: `{ "success": true, "message": "Services by seller retrieved successfully", "data": [...] }`
+### 7. (Optional) Running with XAMPP or Another Local Server
 
-- **GET /api/services/my-services** - Get services for the current seller
-  - Response: `{ "success": true, "message": "Your services retrieved successfully", "data": [...] }`
+If you prefer using XAMPP or a different local web server instead of PHP's built-in server, follow these steps:
 
-### Categories
+1. **Copy your project folder (`sundarta`) to the `htdocs` folder of your XAMPP installation** (usually located in `C:\xampp\htdocs` for Windows or `/opt/lampp/htdocs` for Linux).
+   
+2. **Start XAMPP** (or your chosen local server).
+   - On Windows, launch the XAMPP Control Panel and start Apache and MySQL.
+   - On Linux, start Apache and MySQL via terminal or through the XAMPP manager (`sudo /opt/lampp/lampp start`).
 
-- **GET /api/categories** - Get all categories
-  - Query Parameters: `with_counts`
-  - Response: `{ "success": true, "message": "Categories retrieved successfully", "data": [...] }`
+3. **Set up the `.env` file** as described in Step 4.
 
-- **POST /api/categories** - Create a new category (admin only)
-  - Request: `{ "name": "string" }`
-  - Response: `{ "success": true, "message": "Category created successfully", "data": { ... } }`
+4. **Create the database** as described in Step 5 (you can use phpMyAdmin on XAMPP to easily create the database if preferred).
 
-- **GET /api/categories/detail** - Get a category by ID
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Category retrieved successfully", "data": { ... } }`
+5. **Access the application** by navigating to `http://localhost/sundarta` in your web browser.
 
-- **PUT /api/categories/detail** - Update a category (admin only)
-  - Query Parameters: `id`
-  - Request: `{ "name": "string" }`
-  - Response: `{ "success": true, "message": "Category updated successfully", "data": { ... } }`
+### 8. Testing and Access
 
-- **DELETE /api/categories/detail** - Delete a category (admin only)
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Category deleted successfully" }`
+After completing the setup:
 
-### Reviews
+- If you're using the PHP built-in server: Open your browser and go to `http://localhost:8000`.
+- If you're using XAMPP or another local server: Open your browser and go to `http://localhost/sundarta` (adjust the path based on where you placed your project folder).
 
-- **GET /api/reviews/product** - Get reviews for a product
-  - Query Parameters: `product_id`
-  - Response: `{ "success": true, "message": "Product reviews retrieved successfully", "data": { "reviews": [...], "average_rating": "number", "total_reviews": "number" } }`
+---
 
-- **POST /api/reviews/product** - Create a review for a product
-  - Request: `{ "product_id": "number", "rating": "number", "review": "string" }`
-  - Response: `{ "success": true, "message": "Review created successfully", "data": { "id": "number" } }`
+### Additional Notes for Specific Environments:
 
-- **GET /api/reviews/service** - Get reviews for a service
-  - Query Parameters: `service_id`
-  - Response: `{ "success": true, "message": "Service reviews retrieved successfully", "data": { "reviews": [...], "average_rating": "number", "total_reviews": "number" } }`
-
-- **POST /api/reviews/service** - Create a review for a service
-  - Request: `{ "service_id": "number", "rating": "number", "review": "string" }`
-  - Response: `{ "success": true, "message": "Review created successfully", "data": { "id": "number" } }`
-
-- **PUT /api/reviews/detail** - Update a review
-  - Query Parameters: `id`
-  - Request: `{ "rating": "number", "review": "string" }`
-  - Response: `{ "success": true, "message": "Review updated successfully" }`
-
-- **DELETE /api/reviews/detail** - Delete a review
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Review deleted successfully" }`
-
-- **GET /api/reviews/my-reviews** - Get reviews by the current user
-  - Response: `{ "success": true, "message": "Your reviews retrieved successfully", "data": [...] }`
-
-### Orders
-
-- **GET /api/orders** - Get all orders (admin only)
-  - Query Parameters: `page`, `per_page`, `user_id`, `status`
-  - Response: `{ "success": true, "message": "Orders retrieved successfully", "data": { "orders": [...], "pagination": { ... } } }`
-
-- **POST /api/orders** - Create a new order
-  - Request: `{ "product_id": "number", "quantity": "number", "from_cart": "boolean" }`
-  - Response: `{ "success": true, "message": "Order created successfully", "data": { ... } }`
-
-- **GET /api/orders/detail** - Get an order by ID
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Order retrieved successfully", "data": { ... } }`
-
-- **PUT /api/orders/detail** - Update order status (admin only)
-  - Query Parameters: `id`
-  - Request: `{ "status": "string" }`
-  - Response: `{ "success": true, "message": "Order status updated successfully", "data": { ... } }`
-
-- **GET /api/orders/my-orders** - Get orders for the current user
-  - Response: `{ "success": true, "message": "Your orders retrieved successfully", "data": [...] }`
-
-- **GET /api/orders/statistics** - Get order statistics (admin only)
-  - Response: `{ "success": true, "message": "Order statistics retrieved successfully", "data": { ... } }`
-
-- **POST /api/orders/checkout** - Create orders from cart
-  - Response: `{ "success": true, "message": "Orders created successfully", "data": [...] }`
-
-### Cart
-
-- **GET /api/cart** - Get cart items for the current user
-  - Response: `{ "success": true, "message": "Cart retrieved successfully", "data": { "items": [...], "summary": { ... } } }`
-
-- **POST /api/cart** - Add an item to the cart
-  - Request: `{ "product_id": "number", "quantity": "number" }`
-  - Response: `{ "success": true, "message": "Item added to cart successfully", "data": { "items": [...], "summary": { ... } } }`
-
-- **PUT /api/cart/item** - Update cart item quantity
-  - Query Parameters: `id`
-  - Request: `{ "quantity": "number" }`
-  - Response: `{ "success": true, "message": "Cart item updated successfully", "data": { "items": [...], "summary": { ... } } }`
-
-- **DELETE /api/cart/item** - Remove an item from the cart
-  - Query Parameters: `id`
-  - Response: `{ "success": true, "message": "Item removed from cart successfully", "data": { "items": [...], "summary": { ... } } }`
-
-- **DELETE /api/cart/clear** - Clear the cart
-  - Response: `{ "success": true, "message": "Cart cleared successfully" }`
-
-- **GET /api/cart/check-stock** - Check if cart items are in stock
-  - Response: `{ "success": true, "message": "Stock check completed", "data": { "out_of_stock_items": [...], "has_stock_issues": "boolean" } }`
+#### Windows (without XAMPP)
+- Ensure PHP is installed and available in your system's PATH.
+- MySQL/MariaDB can be installed separately or as part of WAMP/XAMPP.
+- For simplicity, you can install WAMP or XAMPP, which provides a pre-configured PHP + MySQL environment.
+
+#### Linux
+- PHP and MySQL/MariaDB can be installed using your package manager (e.g., `sudo apt install php mysql-server`).
+- Make sure to install the necessary PHP extensions (such as `pdo_mysql`) if they're not installed by default.
 
 ## License
 
