@@ -1,7 +1,11 @@
 RewriteEngine On
 RewriteBase /sundarta/
 
-# Redirect all requests to index.php except for existing files or directories
+# Handle API requests
+RewriteCond %{REQUEST_URI} !^/sundarta/api/index.php$
+RewriteRule ^api/(.*)$ /sundarta/api/index.php?api_route=$1 [QSA,L]
+
+# Handle frontend requests
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [L,QSA]
+RewriteRule ^(.*)$ /sundarta/index.php?route=$1 [QSA,L]

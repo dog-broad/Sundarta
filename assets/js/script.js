@@ -1,6 +1,3 @@
-// Sundarta - Beauty & Wellness
-// JS Functionality
-
 document.addEventListener('DOMContentLoaded', function() {
     // Accordion functionality
     const accordionHeaders = document.querySelectorAll('.accordion-header');
@@ -120,6 +117,72 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Product Gallery Functionality
+    const productGalleries = document.querySelectorAll('.product-gallery');
+    
+    productGalleries.forEach(gallery => {
+        const container = gallery.querySelector('.product-gallery-container');
+        const images = gallery.querySelectorAll('.product-gallery-image');
+        const dotsContainer = gallery.querySelector('.product-gallery-nav');
+        const prevButton = gallery.querySelector('.product-gallery-prev');
+        const nextButton = gallery.querySelector('.product-gallery-next');
+        let currentIndex = 0;
+        
+        // Don't set up if there's only one image
+        if (images.length <= 1) return;
+        
+        // Create dots for navigation
+        if (dotsContainer) {
+            images.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `product-gallery-dot ${index === 0 ? 'active' : ''}`;
+                dot.addEventListener('click', () => {
+                    goToSlide(index);
+                });
+                dotsContainer.appendChild(dot);
+            });
+        }
+        
+        // Previous button functionality
+        if (prevButton) {
+            prevButton.addEventListener('click', () => {
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                updateGallery();
+            });
+        }
+        
+        // Next button functionality
+        if (nextButton) {
+            nextButton.addEventListener('click', () => {
+                currentIndex = (currentIndex + 1) % images.length;
+                updateGallery();
+            });
+        }
+        
+        function goToSlide(index) {
+            currentIndex = index;
+            updateGallery();
+        }
+        
+        function updateGallery() {
+            if (container) {
+                container.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+            
+            // Update active dot
+            if (dotsContainer) {
+                const dots = dotsContainer.querySelectorAll('.product-gallery-dot');
+                dots.forEach((dot, index) => {
+                    if (index === currentIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+        }
+    });
 });
 
 // Add smooth scrolling to all links
