@@ -11,6 +11,11 @@
 
 
 <body>
+        <!-- Context 
+ <h2 class="font-heading text-5xl mb-6 pb-2 border-b text-center mt-10 items-center">Revitalize Your Skin,       
+    <br> Redefine Your Beauty.
+    </h2>-->
+
     <!-- Header -->
     <header class="bg-surface shadow-md">
         <nav class="flex justify-between items-center py-4">
@@ -22,7 +27,7 @@
             <!-- Navigation links -->
              <div class="flex items-center gap-4">
                 <a href="/sundarta/home" class="text-text-light hover:text-primary transition-colors h-5">
-                <i class="fa-solid fa-house pr-5"></i>
+                <i class="fa-solid fa-house pr-3"></i>
                 </a>
                 
                 <a href="/sundarta/Login" class="text-text-light hover:text-primary transition-colors h-5">
@@ -36,7 +41,7 @@
 
     <!-- Login form -->
 <div class="flex justify-center">
-    <div class="form-container mx-auto w-96 p-8 mt-20 bg-sand shadow-md rounded-md">
+    <div class="form-container mx-auto w-96 p-8 mt-20 mb-20 bg-sand shadow-md rounded-md">
         <h2 class="text-4xl font-bold mb-6 text-center">Register</h2>
         <form action="/sundarta/api/users/login" method="POST" class="space-y-6">
         <div class="input-group">
@@ -60,6 +65,11 @@
     </div>
 </div>
 </body>
+
+<!-- Footer -->
+<?php
+require 'partials/footer.php';
+?>
 </html>
 
 
