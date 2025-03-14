@@ -6,6 +6,7 @@
     <title>Login</title>
     <link rel="stylesheet" href="/sundarta/assets/css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 
@@ -14,14 +15,21 @@
     <header class="bg-surface shadow-md">
         <nav class="flex justify-between items-center py-4">
             <div class="flex items-center">
-                <a href="/" class="text-2xl font-bold text-primary">sundarta
-                    <span class="text-secondary">.</span>
+                <a href="/sundarta" class="text-2xl pl-5 font-bold text-primary">sundarta.
                 </a>
             </div>
 
             <!-- Navigation links -->
-             <div class="hidden md-flex items-center gap-6">
-                <a href=""></a>
+             <div class="flex items-center gap-4">
+                <a href="/sundarta/home" class="text-text-light hover:text-primary transition-colors h-5">
+                <i class="fa-solid fa-house pr-5"></i>
+                </a>
+                
+                <a href="/sundarta/Login" class="text-text-light hover:text-primary transition-colors h-5">
+                    <i class="fa-solid fa-user-alt pr-5 text-[5pt]">
+
+                    </i>
+                </a>
              </div>
         </nav>
     </header>
