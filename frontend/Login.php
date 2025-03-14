@@ -31,9 +31,7 @@
                 </a>
                 
                 <a href="/sundarta/Login" class="text-text-light hover:text-primary transition-colors h-5">
-                    <i class="fa-solid fa-user-alt pr-5 text-[5pt]">
-
-                    </i>
+                    <i class="fa-solid fa-user-alt pr-5 text-[5pt]"></i>
                 </a>
              </div>
         </nav>
@@ -42,20 +40,13 @@
     <!-- Login form -->
 <div class="flex justify-center">
     <div class="form-container mx-auto w-96 p-8 mt-20 mb-20 bg-sand shadow-md rounded-md">
-        <h2 class="text-4xl font-bold mb-6 text-center">Register</h2>
-        <form action="/sundarta/api/users/login" method="POST" class="space-y-6">
-        <div class="input-group">
-            <label for="username" class="input-label">Username</label>
-            <input type="text" id="username" name="username" class="input-text w-full" placeholder="Enter username" required>
-        </div>
-        <div class="input-group">
+        <h2 class="text-4xl font-bold mb-6 text-center">Login</h2>
+        <form id="loginForm" class="space-y-6" onsubmit="event.preventDefault(); performLogin();">
+          <div class="input-group">
             <label for="email" class="input-label">Email</label>
             <input type="email" id="email" name="email" class="input-text w-full" placeholder="Enter email" required >
         </div>
-        <div class="input-group">
-            <label for="phone" class="input-label">Phone Number</label>
-            <input type="tel" id="phone" name="phone" class="input-text w-full" placeholder="Enter phone number" required>
-        </div>
+        
         <div class="input-group">
             <label for="password" class="input-label">Password</label>
             <input type="password" id="password" name="password" class="input-text w-full" placeholder="Enter password" required>
@@ -64,6 +55,35 @@
         </form>
     </div>
 </div>
+
+
+<!-- JavaScript -->
+<script>
+async function performLogin() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  console.log('Attempting login with:', { email, password });
+
+  const response = await fetch('/sundarta/api/users/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  });
+
+  const result = await response.json();
+  console.log('Server response:', result);
+
+  if (response.ok) {
+    alert('Login successful! Welcome, ' + result.username);
+    window.location.href = '/sundarta/home';
+  } else {
+    alert(result.message || 'Invalid email or password. Please try again.');
+  }
+}
+
 </body>
 
 <!-- Footer -->
@@ -71,5 +91,3 @@
 require 'partials/footer.php';
 ?>
 </html>
-
-
