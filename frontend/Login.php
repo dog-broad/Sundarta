@@ -56,7 +56,6 @@
     </div>
 </div>
 
-
 <!-- JavaScript -->
 <script>
 async function performLogin() {
@@ -77,13 +76,13 @@ async function performLogin() {
   console.log('Server response:', result);
 
   if (response.ok) {
-    alert('Login successful! Welcome, ' + result.username);
+    alert('Login successful! Welcome ' + result.username);
     window.location.href = '/sundarta/home';
   } else {
     alert(result.message || 'Invalid email or password. Please try again.');
   }
 }
-
+</script>
 </body>
 
 <!-- Footer -->
