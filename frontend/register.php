@@ -74,7 +74,7 @@ if (isAuthenticated()) {
             </div>
 
             <!-- Error Message Container -->
-            <div id="register-error" class="error-message hidden"></div>
+            <div id="alerts-container" class="alerts-container hidden"></div>
 
             <!-- Submit Button -->
             <button type="submit" class="btn btn-primary w-full">Create Account</button>
@@ -87,6 +87,9 @@ if (isAuthenticated()) {
         </p>
     </div>
 </div>
+
+<!-- Import Auth Module -->
+<script type="module" src="/sundarta/assets/js/modules/auth.js"></script>
 
 <?php
 require 'partials/footer.php';

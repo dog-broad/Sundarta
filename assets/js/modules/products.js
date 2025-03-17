@@ -15,69 +15,227 @@
  * - GET /api/reviews/product
  * - POST /api/reviews/product
  * - POST /api/cart/item
+
+ * This module handles product-related functionality:
+ * - Fetching products from the API
+ * - Displaying products in a grid
+ * - Filtering and sorting products
+ * - Product search
  */
 
 import API from '../utils/api.js';
-import Auth from '../utils/auth.js';
+import UI from '../utils/ui.js';
 
-const Products = {
+const ProductsModule = {
     /**
-     * Get products list with optional filters
-     * @param {Object} filters - Filter parameters
-     * @param {number} page - Page number
-     * @param {number} perPage - Items per page
-     * @returns {Promise<Object>}
+     * Fetch featured products
+     * @param {number} limit - Number of products to fetch
+     * @returns {Promise<Array>} - Array of products
      */
-    getProducts: async (filters = {}, page = 1, perPage = 12) => {
-        // Implementation details will go here
+    getFeaturedProducts: async (limit = 6) => {
+        try {
+            const response = await API.get('/products/featured', { limit });
+            
+            if (response.success) {
+                return response.data;
+            }
+            
+            return [];
+        } catch (error) {
+            console.error('Error fetching featured products:', error);
+            return [];
+        }
     },
-
+    
     /**
-     * Get single product details
-     * @param {number} productId 
-     * @returns {Promise<Object>}
+     * Fetch products with pagination
+     * @param {Object} options - Pagination and filter options
+     * @returns {Promise<Object>} - Products and pagination info
      */
-    getProductDetails: async (productId) => {
-        // Implementation details will go here
+    getProducts: async (options = {}) => {
+        const {
+            page = 1,
+            limit = 12,
+            category = null,
+            sort = 'newest',
+            search = null
+        } = options;
+        
+        try {
+            let endpoint = '/products';
+            const params = { page, limit };
+            
+            // Add category filter if provided
+            if (category) {
+                params.category = category;
+            }
+            
+            // Add sort parameter
+            params.sort = sort;
+            
+            // Use search endpoint if search term is provided
+            if (search) {
+                endpoint = '/products/search';
+                params.query = search;
+            }
+            
+            const response = await API.get(endpoint, params);
+            
+            if (response.success) {
+                return {
+                    products: response.data,
+                    pagination: response.pagination
+                };
+            }
+            
+            return {
+                products: [],
+                pagination: {
+                    total: 0,
+                    page: 1,
+                    limit: limit,
+                    pages: 0
+                }
+            };
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            return {
+                products: [],
+                pagination: {
+                    total: 0,
+                    page: 1,
+                    limit: limit,
+                    pages: 0
+                }
+            };
+        }
     },
-
+    
     /**
-     * Search products
-     * @param {string} query 
-     * @returns {Promise<Array>}
+     * Render product card HTML
+     * @param {Object} product - Product data
+     * @returns {string} - HTML for product card
      */
-    searchProducts: async (query) => {
-        // Implementation details will go here
+    renderProductCard: (product) => {
+        const images = JSON.parse(product.images);
+        return `
+            <div class="card card-product">
+                <img src="${images[0]}" 
+                     alt="${product.name}" 
+                     class="card-product-image">
+                <div class="card-product-body">
+                    ${product.is_new ? '<span class="badge badge-primary mb-2">New</span>' : ''}
+                    <h3 class="font-heading text-lg mb-1">${product.name}</h3>
+                    <p class="text-text-light text-sm mb-2">${product.short_description || ''}</p>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-primary">
+                            ${ProductsModule.renderStarRating(product.rating || 0)}
+                        </div>
+                        <span class="text-xs ml-1">(${parseFloat(product.rating).toFixed(1) || 0})</span>
+                    </div>
+                </div>
+                <div class="card-product-footer flex justify-between items-center">
+                    <span class="font-semibold">₹${parseFloat(product.price).toFixed(2)}</span>
+                    <button class="btn btn-primary py-1 px-3 text-sm add-to-cart-btn" data-product-id="${product.id}">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        `;
     },
-
+    
     /**
-     * Get product reviews
-     * @param {number} productId 
-     * @returns {Promise<Array>}
+     * Render star rating HTML
+     * @param {number} rating - Rating value (0-5)
+     * @returns {string} - HTML for star rating
      */
-    getProductReviews: async (productId) => {
-        // Implementation details will go here
+    renderStarRating: (rating) => {
+        const fullStars = Math.floor(rating);
+        const halfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+        
+        let starsHtml = '';
+        
+        // Add full stars
+        for (let i = 0; i < fullStars; i++) {
+            starsHtml += '<i class="fas fa-star"></i>';
+        }
+        
+        // Add half star if needed
+        if (halfStar) {
+            starsHtml += '<i class="fas fa-star-half-alt"></i>';
+        }
+        
+        // Add empty stars
+        for (let i = 0; i < emptyStars; i++) {
+            starsHtml += '<i class="far fa-star"></i>';
+        }
+        
+        return starsHtml;
     },
-
+    
     /**
-     * Add product review
-     * @param {number} productId 
-     * @param {Object} reviewData 
-     * @returns {Promise}
+     * Render products grid
+     * @param {Array} products - Array of product objects
+     * @param {HTMLElement} container - Container element
      */
-    addProductReview: async (productId, reviewData) => {
-        // Implementation details will go here
+    renderProductsGrid: (products, container) => {
+        if (!container) return;
+        
+        if (products.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-box-open text-4xl text-text-light mb-4"></i>
+                    <p class="text-text-light">No products found.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const productsHtml = products.map(product => ProductsModule.renderProductCard(product)).join('');
+        
+        container.innerHTML = productsHtml;
+        
+        // Add event listeners to "Add to Cart" buttons
+        const addToCartButtons = container.querySelectorAll('.add-to-cart-btn');
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const productId = e.target.getAttribute('data-product-id');
+                // Here you would call a cart module function to add the product to cart
+                // For now, just show a success message
+                UI.showAlert('Product added to cart!', 'success');
+            });
+        });
     },
-
+    
     /**
-     * Add product to cart
-     * @param {number} productId 
-     * @param {number} quantity 
-     * @returns {Promise}
+     * Initialize featured products section
+     * @param {string} containerId - ID of container element
+     * @param {number} limit - Number of products to display
      */
-    addToCart: async (productId, quantity = 1) => {
-        // Implementation details will go here
+    initFeaturedProducts: async (containerId = 'featured-products', limit = 6) => {
+        const container = document.getElementById(containerId);
+        
+        if (!container) return;
+        
+        // Show loading state
+        container.innerHTML = `
+            <div class="text-center py-8">
+                <div class="loading-spinner">
+                    <div class="spinner-container">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                <p class="mt-4 text-text-light">Loading products...</p>
+            </div>
+        `;
+        
+        // Fetch featured products
+        const products = await ProductsModule.getFeaturedProducts(limit);
+        
+        // Render products
+        ProductsModule.renderProductsGrid(products, container);
     }
 };
 
-export default Products; 
+export default ProductsModule; 

@@ -12,6 +12,7 @@
  */
 
 import API from './api.js';
+import UI from './ui.js';
 
 const Auth = {
     /**
@@ -24,7 +25,20 @@ const Auth = {
      * Checks if user is logged in and loads profile
      */
     init: async () => {
-        // Implementation details will go here
+        try {
+            // Try to get user profile
+            const response = await API.get('/users/profile');
+            
+            if (response.success) {
+                Auth.user = response.data;
+                return true;
+            }
+        } catch (error) {
+            // User is not logged in or session expired
+            Auth.user = null;
+        }
+        
+        return false;
     },
 
     /**
@@ -34,7 +48,30 @@ const Auth = {
      * @returns {Promise}
      */
     login: async (email, password) => {
-        // Implementation details will go here
+        try {
+            const response = await API.post('/users/login', {
+                email,
+                password
+            });
+            
+            if (response.success) {
+                Auth.user = response.data;
+                return {
+                    success: true,
+                    user: response.data
+                };
+            }
+            
+            return {
+                success: false,
+                message: response.message || 'Login failed'
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message || 'Login failed. Please try again.'
+            };
+        }
     },
 
     /**
@@ -42,7 +79,26 @@ const Auth = {
      * @returns {Promise}
      */
     logout: async () => {
-        // Implementation details will go here
+        try {
+            const response = await API.post('/users/logout');
+            
+            // Clear user state regardless of response
+            Auth.user = null;
+            
+            return {
+                success: true
+            };
+        } catch (error) {
+            console.error('Logout error:', error);
+            
+            // Still clear user state
+            Auth.user = null;
+            
+            return {
+                success: false,
+                message: error.message || 'Logout failed. Please try again.'
+            };
+        }
     },
 
     /**
@@ -51,7 +107,31 @@ const Auth = {
      * @returns {Promise<boolean>}
      */
     hasPermission: async (permission) => {
-        // Implementation details will go here
+        try {
+            const response = await API.get('/permissions/check', {
+                permission
+            });
+            
+            return response.success && response.data.hasPermission;
+        } catch (error) {
+            console.error('Permission check error:', error);
+            return false;
+        }
+    },
+
+    /**
+     * Check if user has specific role
+     * @param {string} role 
+     * @returns {boolean}
+     */
+    hasRole: (role) => {
+        if (!Auth.user || !Auth.user.roles) {
+            return false;
+        }
+        
+        return Auth.user.roles.some(r => 
+            r.name === role || r.id === role
+        );
     },
 
     /**
@@ -59,7 +139,19 @@ const Auth = {
      * @returns {Promise<Object>}
      */
     getProfile: async () => {
-        // Implementation details will go here
+        try {
+            const response = await API.get('/users/profile');
+            
+            if (response.success) {
+                Auth.user = response.data;
+                return Auth.user;
+            }
+            
+            throw new Error(response.message || 'Failed to get profile');
+        } catch (error) {
+            console.error('Get profile error:', error);
+            throw error;
+        }
     },
 
     /**
@@ -68,7 +160,93 @@ const Auth = {
      * @returns {Promise}
      */
     updateProfile: async (data) => {
-        // Implementation details will go here
+        try {
+            const response = await API.put('/users/profile', data);
+            
+            if (response.success) {
+                // Update local user state
+                Auth.user = {
+                    ...Auth.user,
+                    ...data
+                };
+                
+                return {
+                    success: true,
+                    user: Auth.user
+                };
+            }
+            
+            return {
+                success: false,
+                message: response.message || 'Profile update failed'
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message || 'Profile update failed. Please try again.'
+            };
+        }
+    },
+
+    /**
+     * Update user password
+     * @param {string} currentPassword 
+     * @param {string} newPassword 
+     * @returns {Promise}
+     */
+    updatePassword: async (currentPassword, newPassword) => {
+        try {
+            const response = await API.put('/users/password', {
+                current_password: currentPassword,
+                new_password: newPassword
+            });
+            
+            return {
+                success: response.success,
+                message: response.message
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message || 'Password update failed. Please try again.'
+            };
+        }
+    },
+
+    /**
+     * Register new user
+     * @param {Object} userData 
+     * @returns {Promise}
+     */
+    register: async (userData) => {
+        try {
+            const response = await API.post('/users/register', userData);
+            
+            if (response.success) {
+                return {
+                    success: true,
+                    user: response.data
+                };
+            }
+            
+            return {
+                success: false,
+                message: response.message || 'Registration failed'
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message || 'Registration failed. Please try again.'
+            };
+        }
+    },
+
+    /**
+     * Check if user is logged in
+     * @returns {boolean}
+     */
+    isLoggedIn: () => {
+        return Auth.user !== null;
     }
 };
 

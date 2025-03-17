@@ -1,101 +1,147 @@
 <?php
-/**
- * User Profile Page
- * 
- * This page displays and manages user profile information.
- * It integrates with the following API endpoints:
- * - GET /api/users/profile - Get user profile
- * - PUT /api/users/profile - Update profile
- * - PUT /api/users/password - Update password
- * - GET /api/orders/my-orders - Get user's order history
- * - GET /api/reviews/my-reviews - Get user's reviews
- * - GET /api/services/my-services - Get seller's services (if seller)
- * 
- * Required JS Modules:
- * - modules/profile.js - Handles profile management
- * - modules/orders.js - Displays order history
- * - modules/reviews.js - Displays user reviews
- * - modules/services.js - Manages seller services
- * - utils/validation.js - Form validation
- * - utils/ui.js - UI feedback
- */
-
 require_once __DIR__ . '/../backend/helpers/auth.php';
+require 'partials/header.php';
 
 // Redirect if not logged in
-if (!isAuthenticated()) {
-    header('Location: /sundarta/login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+if (!isLoggedIn()) {
+    header('Location: /sundarta/login?redirect=/sundarta/profile');
     exit;
 }
-
-// Now we can safely include header and output content
-require 'partials/header.php';
 ?>
 
-<div class="container mx-auto py-8">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Sidebar Navigation -->
-        <div class="md:col-span-1">
-            <nav class="profile-nav">
-                <a href="#profile" class="profile-nav-item active" data-tab="profile">Profile Information</a>
-                <a href="#password" class="profile-nav-item" data-tab="password">Change Password</a>
-                <a href="#orders" class="profile-nav-item" data-tab="orders">Order History</a>
-                <a href="#reviews" class="profile-nav-item" data-tab="reviews">My Reviews</a>
-                <?php if (hasRole('seller')): ?>
-                <a href="#services" class="profile-nav-item" data-tab="services">My Services</a>
-                <?php endif; ?>
-            </nav>
+<div class="container mx-auto py-8 px-4">
+    <h1 class="font-heading text-3xl mb-8 text-center">My Profile</h1>
+    
+    <div class="max-w-4xl mx-auto">
+        <!-- Profile Tabs -->
+        <div class="mb-8">
+            <div class="flex border-b overflow-x-auto">
+                <!-- Tab buttons with accessible titles/labels -->
+                <button 
+                    title="View Profile Information"
+                    type="button"
+                    class="tab-btn active py-2 px-4 font-medium" 
+                    data-tab="profile-info" 
+                    aria-label="View Profile Information">
+                    Profile Information
+                </button>
+                <button 
+                    title="Change Password"
+                    type="button"
+                    class="tab-btn py-2 px-4 font-medium" 
+                    data-tab="change-password" 
+                    aria-label="Change Password">
+                    Change Password
+                </button>
+                <button 
+                    title="View My Orders"
+                    type="button"
+                    class="tab-btn py-2 px-4 font-medium" 
+                    data-tab="orders" 
+                    aria-label="View My Orders">
+                    My Orders
+                </button>
+            </div>
         </div>
-
-        <!-- Main Content Area -->
-        <div class="md:col-span-2">
-            <!-- Profile Tab -->
-            <div id="profile-tab" class="profile-tab active">
-                <h2 class="font-heading text-2xl mb-6">Profile Information</h2>
-                <form id="profile-form" class="profile-form">
-                    <!-- Profile form fields will be populated by JS -->
+        
+        <!-- Alert Container -->
+        <div class="alerts-container mb-6 hidden"></div>
+        
+        <!-- Profile Information Tab -->
+        <div class="tab-content active" id="profile-info">
+            <div class="card p-6">
+                <form id="profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2 flex flex-col items-center mb-4">
+                        <div class="relative mb-4">
+                            <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 mb-2">
+                                <img id="avatar-preview" src="" alt="Profile Avatar" class="w-full h-full object-cover">
+                            </div>
+                            <label for="avatar-upload" class="absolute bottom-0 right-0 bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer">
+                                <i class="fas fa-camera"></i>
+                            </label>
+                            <input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/*">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="username" class="input-label">Username</label>
+                        <input type="text" id="username" name="username" class="input-text" placeholder="Your username">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="email" class="input-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="input-text" placeholder="Your email address">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="phone" class="input-label">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="input-text" placeholder="Your phone number">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Account Type</label>
+                        <div id="user-roles" class="py-2 text-text-light"></div>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <button type="submit" class="btn btn-primary w-full md:w-auto">Save Changes</button>
+                    </div>
                 </form>
             </div>
-
-            <!-- Password Tab -->
-            <div id="password-tab" class="profile-tab hidden">
-                <h2 class="font-heading text-2xl mb-6">Change Password</h2>
-                <form id="password-form" class="password-form">
-                    <!-- Password form fields will be populated by JS -->
+        </div>
+        
+        <!-- Change Password Tab -->
+        <div class="tab-content hidden" id="change-password">
+            <div class="card p-6">
+                <form id="password-form" class="grid grid-cols-1 gap-6">
+                    <div class="input-group">
+                        <label for="current-password" class="input-label">Current Password</label>
+                        <input type="password" id="current-password" name="current_password" class="input-text" placeholder="Enter your current password">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="new-password" class="input-label">New Password</label>
+                        <input type="password" id="new-password" name="new_password" class="input-text" placeholder="Enter your new password">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirm-password" class="input-label">Confirm New Password</label>
+                        <input type="password" id="confirm-password" name="confirm_password" class="input-text" placeholder="Confirm your new password">
+                    </div>
+                    
+                    <div>
+                        <button type="submit" class="btn btn-primary w-full md:w-auto">Update Password</button>
+                    </div>
                 </form>
             </div>
-
-            <!-- Orders Tab -->
-            <div id="orders-tab" class="profile-tab hidden">
-                <h2 class="font-heading text-2xl mb-6">Order History</h2>
-                <div class="orders-list">
-                    <!-- Orders will be populated by JS -->
+        </div>
+        
+        <!-- Orders Tab -->
+        <div class="tab-content hidden" id="orders">
+            <div class="card p-6">
+                <div id="orders-container">
+                    <div class="text-center py-8">
+                        <div class="loading-spinner">
+                            <div class="spinner-container">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-text-light">Loading your orders...</p>
+                    </div>
                 </div>
             </div>
-
-            <!-- Reviews Tab -->
-            <div id="reviews-tab" class="profile-tab hidden">
-                <h2 class="font-heading text-2xl mb-6">My Reviews</h2>
-                <div class="reviews-list">
-                    <!-- Reviews will be populated by JS -->
-                </div>
-            </div>
-
-            <!-- Services Tab (Seller Only) -->
-            <?php if (hasRole('seller')): ?>
-            <div id="services-tab" class="profile-tab hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="font-heading text-2xl">My Services</h2>
-                    <button id="add-service-btn" class="btn btn-primary">Add New Service</button>
-                </div>
-                <div class="services-list">
-                    <!-- Services will be populated by JS -->
-                </div>
-            </div>
-            <?php endif; ?>
         </div>
     </div>
 </div>
+
+<script type="module">
+    import ProfileModule from '/sundarta/assets/js/modules/profile.js';
+    
+    // Initialize profile module
+    document.addEventListener('DOMContentLoaded', () => {
+        ProfileModule.init();
+    });
+</script>
 
 <?php
 require 'partials/footer.php';

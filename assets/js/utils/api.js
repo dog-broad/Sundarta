@@ -19,7 +19,43 @@ const API = {
      * @returns {Promise} - API response
      */
     request: async (endpoint, options = {}) => {
-        // Implementation details will go here
+        const url = `${API.baseUrl}${endpoint}`;
+        
+        // Default headers
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+        
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers,
+                credentials: 'include' // Include cookies for session authentication
+            });
+            
+            const data = await response.json();
+            
+            // Check for API error responses
+            if (!response.ok) {
+                const error = new Error(data.message || 'An error occurred');
+                error.status = response.status;
+                error.data = data;
+                throw error;
+            }
+            
+            return data;
+        } catch (error) {
+            // Handle network errors
+            if (!error.status) {
+                error.message = 'Network error. Please check your connection.';
+            }
+            
+            // Log error for debugging
+            console.error('API Error:', error);
+            
+            throw error;
+        }
     },
 
     /**
@@ -29,7 +65,14 @@ const API = {
      * @returns {Promise} - API response
      */
     get: async (endpoint, params = {}) => {
-        // Implementation details will go here
+        // Add query parameters to URL if provided
+        const queryString = Object.keys(params).length 
+            ? `?${new URLSearchParams(params).toString()}`
+            : '';
+            
+        return API.request(`${endpoint}${queryString}`, {
+            method: 'GET'
+        });
     },
 
     /**
@@ -39,7 +82,10 @@ const API = {
      * @returns {Promise} - API response
      */
     post: async (endpoint, data = {}) => {
-        // Implementation details will go here
+        return API.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
     },
 
     /**
@@ -49,7 +95,10 @@ const API = {
      * @returns {Promise} - API response
      */
     put: async (endpoint, data = {}) => {
-        // Implementation details will go here
+        return API.request(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
     },
 
     /**
@@ -58,7 +107,9 @@ const API = {
      * @returns {Promise} - API response
      */
     delete: async (endpoint) => {
-        // Implementation details will go here
+        return API.request(endpoint, {
+            method: 'DELETE'
+        });
     }
 };
 

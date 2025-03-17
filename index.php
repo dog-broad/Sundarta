@@ -135,6 +135,7 @@ $frontendRoutes = [
     
     // User account
     'login' => 'frontend/login.php',
+    'logout' => 'frontend/logout.php',
     'register' => 'frontend/register.php',
     'profile' => 'frontend/profile.php',
     
