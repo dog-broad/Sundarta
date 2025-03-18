@@ -70,7 +70,11 @@ class ServiceModel extends BaseModel {
      * @return array Array of services
      */
     public function getByCategory($categoryId) {
-        $sql = "SELECT * FROM {$this->table} WHERE category = ?";
+        $sql = "SELECT s.*, COALESCE(AVG(r.rating), 0) AS rating 
+                FROM {$this->table} s
+                LEFT JOIN reviews r ON s.id = r.service_id
+                WHERE s.category = ?
+                GROUP BY s.id";
         return $this->select($sql, [$categoryId], 'i');
     }
 
@@ -81,7 +85,11 @@ class ServiceModel extends BaseModel {
      * @return array Array of services
      */
     public function getBySeller($userId) {
-        $sql = "SELECT * FROM {$this->table} WHERE user_id = ?";
+        $sql = "SELECT s.*, COALESCE(AVG(r.rating), 0) AS rating 
+                FROM {$this->table} s
+                LEFT JOIN reviews r ON s.id = r.service_id
+                WHERE s.user_id = ?
+                GROUP BY s.id";
         return $this->select($sql, [$userId], 'i');
     }
 
@@ -92,7 +100,11 @@ class ServiceModel extends BaseModel {
      * @return array Array of services
      */
     public function search($query) {
-        $sql = "SELECT * FROM {$this->table} WHERE name LIKE ? OR description LIKE ?";
+        $sql = "SELECT s.*, COALESCE(AVG(r.rating), 0) AS rating 
+                FROM {$this->table} s
+                LEFT JOIN reviews r ON s.id = r.service_id
+                WHERE s.name LIKE ? OR s.description LIKE ?
+                GROUP BY s.id";
         $searchTerm = "%{$query}%";
         return $this->select($sql, [$searchTerm, $searchTerm], 'ss');
     }
@@ -104,7 +116,12 @@ class ServiceModel extends BaseModel {
      * @return array Array of services
      */
     public function getFeatured($limit = 6) {
-        $sql = "SELECT * FROM {$this->table} ORDER BY id DESC LIMIT ?";
+        $sql = "SELECT s.*, COALESCE(AVG(r.rating), 0) AS rating 
+                FROM {$this->table} s
+                LEFT JOIN reviews r ON s.id = r.service_id
+                GROUP BY s.id
+                ORDER BY s.id DESC
+                LIMIT ?";
         return $this->select($sql, [$limit], 'i');
     }
 
@@ -157,8 +174,9 @@ class ServiceModel extends BaseModel {
             $types .= 'ss';
         }
         
-        $sql = "SELECT s.*, u.username as seller_name 
+        $sql = "SELECT s.*, COALESCE(AVG(r.rating), 0) AS rating, u.username as seller_name 
                 FROM {$this->table} s
+                LEFT JOIN reviews r ON s.id = r.service_id
                 JOIN users u ON s.user_id = u.id";
         $countSql = "SELECT COUNT(*) as count FROM {$this->table} s";
         

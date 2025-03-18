@@ -17,23 +17,9 @@
 </head>
 <body class="bg-background font-main">
     <header class="bg-surface shadow-md">
-        <div class="container mx-auto px-6 py-3">
-            <!-- Top Bar -->
-            <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                <div class="text-sm text-text-light">
-                    <span class="mr-4"><i class="fas fa-phone-alt mr-1"></i> +91 1234567890</span>
-                    <span><i class="fas fa-envelope mr-1"></i> info@sundarta.com</span>
-                </div>
-                <div class="social-links">
-                    <a href="#" class="social-link text-sm"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-link text-sm"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-link text-sm"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-link text-sm"><i class="fab fa-pinterest"></i></a>
-                </div>
-            </div>
-            
+        <div class="container mx-auto px-6 py-2">            
             <!-- Main Navigation -->
-            <nav class="flex justify-between items-center py-4">
+            <nav class="flex justify-between items-center py-2">
                 <div class="flex items-center">
                     <a href="/sundarta/" class="font-heading text-2xl font-bold text-primary">
                         Sundarta<span class="text-secondary">.</span>
@@ -75,7 +61,7 @@
                             <label for="user-toggle" class="cursor-pointer text-text-light hover:text-primary transition-colors">
                                 <i class="fas fa-user-circle"></i>
                             </label>
-                            <div id="user-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-surface rounded-md shadow-lg hidden">
+                            <div id="user-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-surface rounded-md shadow-lg hidden z-1000">
                                 <div class="p-3 border-b border-gray-200">
                                     <span class="block font-semibold">Hello, <?php echo $_SESSION['username']; ?></span>
                                 </div>

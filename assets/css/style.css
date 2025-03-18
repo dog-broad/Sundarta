@@ -238,11 +238,32 @@
 
 /* Alert/Notification */
 .alert {
+    display: flex; /* Use flexbox for the alert */
+    justify-content: space-between; /* Spread out the content */
+    align-items: center; /* Vertically align the content */
     padding: var(--space-md);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-md);
+    opacity: 1; /* Initially visible */
+    transition: opacity 0.5s ease, transform 0.5s ease; /* Smooth fade and slide out */
 }
 
+.alert.hide {
+    opacity: 0; /* Fade out */
+    transform: translateX(100%); /* Optional: Slide out to the right */
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.alert-icon {
+    margin-right: var(--space-sm);
+}
+
+/* Alert types */
 .alert-success {
     background-color: #d1e7dd;
     color: #0f5132;
@@ -260,6 +281,7 @@
     color: #842029;
     border: 1px solid #f5c2c7;
 }
+
 
 /* Badges */
 .badge {
@@ -280,6 +302,22 @@
     background-color: var(--secondary);
     color: white;
 }
+
+.badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.badge-error {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
+
+
+
+
 
 /* ========== LAYOUT COMPONENTS ========== */
 
@@ -847,12 +885,48 @@
     right: 10px;
 }
 
-.dark-theme .product-gallery-prev,
-.dark-theme .product-gallery-next {
-    background-color: rgba(0, 0, 0, 0.5);
+/* ========== TABS ========== */
+.tab-btn {
+    position: relative;
+    color: var(--text-light);
+    transition: color 0.3s ease;
 }
 
-.dark-theme .product-gallery-prev:hover,
-.dark-theme .product-gallery-next:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+.tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary);
+    transition: width 0.3s ease;
 }
+
+.tab-btn:hover {
+    color: var(--primary);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+.tab-btn.active::after {
+    width: 100%;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Remove 'hidden' class when active */
+.tab-content.active.hidden {
+    display: block;
+}
+

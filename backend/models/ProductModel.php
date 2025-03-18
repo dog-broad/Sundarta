@@ -70,7 +70,11 @@ class ProductModel extends BaseModel {
      * @return array Array of products
      */
     public function getByCategory($categoryId) {
-        $sql = "SELECT * FROM {$this->table} WHERE category = ?";
+        $sql = "SELECT p.*, COALESCE(AVG(r.rating), 0) AS rating 
+                FROM {$this->table} p
+                LEFT JOIN reviews r ON p.id = r.product_id
+                WHERE p.category = ?
+                GROUP BY p.id";
         return $this->select($sql, [$categoryId], 'i');
     }
 
@@ -81,19 +85,33 @@ class ProductModel extends BaseModel {
      * @return array Array of products
      */
     public function search($query) {
-        $sql = "SELECT * FROM {$this->table} WHERE name LIKE ? OR description LIKE ?";
+        $sql = "
+            SELECT p.*, COALESCE(AVG(r.rating), 0) AS rating 
+            FROM {$this->table} p
+            LEFT JOIN reviews r ON p.id = r.product_id
+            WHERE p.name LIKE ? OR p.description LIKE ?
+            GROUP BY p.id
+        ";
         $searchTerm = "%{$query}%";
         return $this->select($sql, [$searchTerm, $searchTerm], 'ss');
     }
 
     /**
-     * Get featured products (limited number of products)
+     * Get featured products with their average rating
      * 
      * @param int $limit Number of products to return
-     * @return array Array of products
+     * @return array Array of products with ratings
      */
     public function getFeatured($limit = 6) {
-        $sql = "SELECT * FROM {$this->table} ORDER BY id DESC LIMIT ?";
+        $sql = "
+            SELECT p.*, COALESCE(AVG(r.rating), 0) AS rating 
+            FROM {$this->table} p
+            LEFT JOIN reviews r ON p.id = r.product_id
+            GROUP BY p.id
+            ORDER BY p.id DESC
+            LIMIT ?
+        ";
+
         return $this->select($sql, [$limit], 'i');
     }
 
@@ -156,7 +174,9 @@ class ProductModel extends BaseModel {
             $types .= 'ss';
         }
         
-        $sql = "SELECT * FROM {$this->table}";
+        $sql = "SELECT p.*, COALESCE(AVG(r.rating), 0) AS rating 
+                FROM {$this->table} p
+                LEFT JOIN reviews r ON p.id = r.product_id";
         $countSql = "SELECT COUNT(*) as count FROM {$this->table}";
         
         if (!empty($whereClause)) {
@@ -188,5 +208,16 @@ class ProductModel extends BaseModel {
                 'to' => min($offset + $perPage, $totalCount)
             ]
         ];
+    }
+
+    /**
+     * Get product reviews
+     * 
+     * @param int $productId Product ID
+     * @return array Array of reviews
+     */
+    public function getReviews($productId) {
+        $sql = "SELECT * FROM reviews WHERE product_id = ?";
+        return $this->select($sql, [$productId], 'i');
     }
 } 
