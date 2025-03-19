@@ -36,6 +36,11 @@ require 'partials/header.php';
     </div>
 </div>
 
+<script>
+    
+</script>
+
+
 <?php
 require 'partials/footer.php';
 ?> 

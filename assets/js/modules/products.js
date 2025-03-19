@@ -82,10 +82,7 @@ const ProductsModule = {
             const response = await API.get(endpoint, params);
             
             if (response.success) {
-                return {
-                    products: response.data,
-                    pagination: response.pagination
-                };
+                return response.data;
             }
             
             return {
@@ -191,7 +188,7 @@ const ProductsModule = {
             `;
             return;
         }
-        
+        console.log("Products value before map: ", products);
         const productsHtml = products.map(product => ProductsModule.renderProductCard(product)).join('');
         
         container.innerHTML = productsHtml;

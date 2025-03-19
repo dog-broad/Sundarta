@@ -38,7 +38,7 @@ require 'partials/header.php';
 </div>
 
 <!-- Product Details Modal -->
-<div class="card card-product">
+<!-- <div class="card card-product">
     <img src="https://hips.hearstapps.com/hmg-prod/images/ghk-digital-index-haircolor-449-640a4807297b5.jpg?crop=0.668xw:1.00xh;0.167xw,0&resize=480:*" alt="Product" class="card-product-image">
     <div class="card-product-body">
         <span class='badege badge-primary mb-2 w-35 rounded'>New</span>
@@ -48,7 +48,7 @@ require 'partials/header.php';
             <span class="font-bold text-lg">₹1,299.00</span>
             <button class="btn btn-primary">Add to Cart</button>
     </div>
-</div>
+</div> -->
 
 
 
@@ -56,10 +56,17 @@ require 'partials/header.php';
     import ProductModule from '/sundarta/assets/js/modules/products.js';
 
     // Initialize the product module
-  document.renderProductcard('DOMContentLoaded', () => {
-    const productModule = new ProductModule();
-    productModule.init();
-  });
+    document.addEventListener('DOMContentLoaded', async () => {
+        const response = await ProductModule.getProducts();
+        const products = response.products;
+        console.log(products);
+        
+
+        const container=document.querySelector('.products-grid');
+        ProductModule.renderProductsGrid(products,container);
+        
+    });
+
 
 </script>
 
