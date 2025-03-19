@@ -15,7 +15,7 @@ const AuthModule = {
      * @param {string} formSelector - CSS selector for login form
      * @param {string} errorSelector - CSS selector for error message container
      */
-    initLoginForm: (formSelector = '#login-form', errorSelector = '#login-error') => {
+    initLoginForm: (formSelector = '#login-form', errorSelector = '#alerts-conatiner') => {
         const form = document.querySelector(formSelector);
         
         if (!form) return;

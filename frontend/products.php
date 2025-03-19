@@ -37,6 +37,32 @@ require 'partials/header.php';
     </div>
 </div>
 
+<!-- Product Details Modal -->
+<div class="card card-product">
+    <img src="https://hips.hearstapps.com/hmg-prod/images/ghk-digital-index-haircolor-449-640a4807297b5.jpg?crop=0.668xw:1.00xh;0.167xw,0&resize=480:*" alt="Product" class="card-product-image">
+    <div class="card-product-body">
+        <span class='badege badge-primary mb-2 w-35 rounded'>New</span>
+        <h3 class="font-heading text-lg mb-1">The General Kit</h3>
+        <p class="text-text-light mb-2">A complete kit for your haircare needs</p>
+        <div class="flex justify-between items-center">
+            <span class="font-bold text-lg">₹1,299.00</span>
+            <button class="btn btn-primary">Add to Cart</button>
+    </div>
+</div>
+
+
+
+<script type="module">
+    import ProductModule from '/sundarta/assets/js/modules/products.js';
+
+    // Initialize the product module
+  document.renderProductcard('DOMContentLoaded', () => {
+    const productModule = new ProductModule();
+    productModule.init();
+  });
+
+</script>
+
 <?php
 require 'partials/footer.php';
 ?> 
