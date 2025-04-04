@@ -17,24 +17,37 @@
 
 require_once __DIR__ . '/../backend/helpers/auth.php';
 require 'partials/header.php';
+
+// Add user-authenticated class to body if user is logged in
+if (isLoggedIn()) {
+    echo '<script>document.body.classList.add("user-authenticated");</script>';
+}
 ?>
 
 <div class="container mx-auto py-8">
+    <h1 class="font-heading text-3xl mb-6 text-center">Our Services</h1>
+    
     <!-- Service Filters Section -->
-    <div class="filters-container">
-        <!-- Category filter will be populated by JS -->
+    <div id="filters-container" class="mb-8">
+        <!-- Filters will be populated by JS -->
     </div>
 
     <!-- Services Grid -->
-    <div class="services-grid">
+    <div id="services-grid" class="mb-8">
         <!-- Services will be populated by JS -->
     </div>
 
     <!-- Pagination -->
-    <div class="pagination">
+    <div id="pagination" class="my-8">
         <!-- Pagination will be handled by JS -->
     </div>
+    
+    <!-- Alerts Container -->
+    <div class="alerts-container hidden"></div>
 </div>
+
+<!-- Include JavaScript Files -->
+<script type="module" src="/sundarta/assets/js/services-page.js"></script>
 
 <?php
 require 'partials/footer.php';

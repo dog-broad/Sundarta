@@ -10,6 +10,7 @@
 
 import API from '../utils/api.js';
 import UI from '../utils/ui.js';
+import ReviewsModule from './reviews.js';
 
 const ServicesModule = {
     /**
@@ -95,6 +96,46 @@ const ServicesModule = {
             };
         }
     },
+
+    /**
+     * Get service details by ID
+     * @param {number} serviceId - Service ID
+     * @returns {Promise<Object|null>} - Service details or null if not found
+     */
+    getServiceDetails: async (serviceId) => {
+        try {
+            const response = await API.get('/services/detail', { id: serviceId });
+            
+            if (response.success) {
+                return response.data;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('Error fetching service details:', error);
+            return null;
+        }
+    },
+    
+    /**
+     * Add service to cart
+     * @param {number} serviceId - Service ID
+     * @param {number} quantity - Quantity to add
+     * @returns {Promise<boolean>} - Success status
+     */
+    addToCart: async (serviceId, quantity = 1) => {
+        try {
+            const response = await API.post('/cart/item', {
+                service_id: serviceId,
+                quantity
+            });
+            
+            return response.success;
+        } catch (error) {
+            console.error('Error adding service to cart:', error);
+            return false;
+        }
+    },
     
     /**
      * Render service card HTML
@@ -102,18 +143,45 @@ const ServicesModule = {
      * @returns {string} - HTML for service card
      */
     renderServiceCard: (service) => {
+        // Parse images from JSON string or use default placeholder
+        let images;
+        try {
+            images = service.images ? JSON.parse(service.images) : ['https://via.placeholder.com/300x200?text=Service'];
+        } catch (error) {
+            console.error('Error parsing service images:', error);
+            images = ['https://via.placeholder.com/300x200?text=Service'];
+        }
+        
         return `
-            <div class="service-box">
-                <div class="text-primary text-3xl mb-4">
-                    <i class="${service.icon || 'fas fa-spa'}"></i>
+            <div class="card card-service service-card" data-service-id="${service.id}">
+                <img src="${images[0]}" 
+                     alt="${service.name}" 
+                     class="card-service-image">
+                <div class="card-service-body">
+                    ${service.is_new ? '<span class="badge badge-primary mb-2">New</span>' : ''}
+                    <h3 class="font-heading text-lg mb-1">${service.name}</h3>
+                    <p class="text-text-light text-sm mb-2">${service.short_description || ''}</p>
+                    
+                    ${service.rating ? `
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-primary">
+                            ${ReviewsModule.renderStarRating(service.rating || 0)}
+                        </div>
+                        <span class="text-xs ml-1">(${parseFloat(service.rating).toFixed(1) || 0})</span>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="mt-2">
+                        <div class="flex items-center text-sm text-text-light">
+                            <i class="far fa-clock mr-1"></i> ${service.duration || '60 mins'}
+                        </div>
+                    </div>
                 </div>
-                <h3 class="font-heading text-xl mb-2">${service.name}</h3>
-                <p class="text-text-light mb-4">${service.short_description || ''}</p>
-                <div class="flex justify-between items-center">
+                <div class="card-service-footer flex justify-between items-center">
                     <span class="font-semibold">₹${parseFloat(service.price).toFixed(2)}</span>
-                    <a href="/sundarta/service-detail.php?id=${service.id}" class="hover-link text-primary text-sm">
-                        Learn More <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
+                    <button class="btn btn-primary py-1 px-3 text-sm add-to-cart-btn" data-service-id="${service.id}">
+                        Add to Cart
+                    </button>
                 </div>
             </div>
         `;
@@ -137,9 +205,95 @@ const ServicesModule = {
             return;
         }
         
-        const servicesHtml = services.map(service => ServicesModule.renderServiceCard(service)).join('');
+        // Create a grid container
+        let gridHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">`;
         
-        container.innerHTML = servicesHtml;
+        // Add each service card to the grid
+        services.forEach(service => {
+            gridHtml += `<div class="service-grid-item">${ServicesModule.renderServiceCard(service)}</div>`;
+        });
+        
+        // Close the grid container
+        gridHtml += `</div>`;
+        
+        container.innerHTML = gridHtml;
+        
+        // Add event listeners to "Add to Cart" buttons
+        const addToCartButtons = container.querySelectorAll('.add-to-cart-btn');
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.stopPropagation(); // Prevent triggering the card click
+                
+                const serviceId = e.target.getAttribute('data-service-id');
+                const originalBtnText = e.target.innerHTML;
+                
+                // Show loading state
+                e.target.disabled = true;
+                e.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                // Add to cart
+                const success = await ServicesModule.addToCart(serviceId);
+                
+                // Reset button state
+                e.target.disabled = false;
+                e.target.innerHTML = originalBtnText;
+                
+                if (success) {
+                    UI.showSuccess('Service added to cart!');
+                    
+                    // Update cart count in header if it exists
+                    const cartCountElement = document.querySelector('.cart-count');
+                    if (cartCountElement) {
+                        const currentCount = parseInt(cartCountElement.textContent);
+                        cartCountElement.textContent = currentCount + 1;
+                    }
+                } else {
+                    UI.showError('Failed to add service to cart');
+                }
+            });
+        });
+        
+        // Add click event to service cards for navigation to detail page
+        const serviceCards = container.querySelectorAll('.service-card');
+        serviceCards.forEach(card => {
+            card.style.cursor = 'pointer'; // Show pointer cursor on hover
+            card.addEventListener('click', () => {
+                const serviceId = card.getAttribute('data-service-id');
+                window.location.href = `/sundarta/service-detail?id=${serviceId}`;
+            });
+        });
+        
+        // Add styling for service grid
+        const style = document.createElement('style');
+        style.textContent = `
+            .service-grid-item .card-service {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .service-grid-item .card-service-body {
+                flex-grow: 1;
+            }
+            
+            .service-grid-item .card-service-image {
+                height: 200px;
+                object-fit: cover;
+                width: 100%;
+                border-top-left-radius: 0.375rem;
+                border-top-right-radius: 0.375rem;
+            }
+            
+            .card-service {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            
+            .card-service:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            }
+        `;
+        document.head.appendChild(style);
     },
     
     /**

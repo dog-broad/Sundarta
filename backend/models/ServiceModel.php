@@ -24,6 +24,22 @@ class ServiceModel extends BaseModel {
         return $this->insert($sql, [$userId, $name, $description, $price, $category, $images], 'issdis');
     }
 
+
+    /**
+     * Get service by ID, override the parent method to add reviews
+     * 
+     * @param int $id Service ID
+     * @return array|false Service details with reviews or false on failure
+     */
+    public function getById($id) {
+        $service = parent::getById($id);
+        if ($service) {
+            $service['reviews'] = $this->getReviews($id);
+            $service['rating'] = $this->getRating($id);
+        }
+        return $service;
+    }
+
     /**
      * Update a service
      * 
@@ -155,19 +171,19 @@ class ServiceModel extends BaseModel {
         $types = '';
         
         if ($categoryId !== null) {
-            $whereClause[] = "category = ?";
+            $whereClause[] = "s.category = ?";
             $params[] = $categoryId;
             $types .= 'i';
         }
         
         if ($userId !== null) {
-            $whereClause[] = "user_id = ?";
+            $whereClause[] = "s.user_id = ?";
             $params[] = $userId;
             $types .= 'i';
         }
         
         if ($search !== null) {
-            $whereClause[] = "(name LIKE ? OR description LIKE ?)";
+            $whereClause[] = "(s.name LIKE ? OR s.description LIKE ?)";
             $searchTerm = "%{$search}%";
             $params[] = $searchTerm;
             $params[] = $searchTerm;
@@ -178,7 +194,7 @@ class ServiceModel extends BaseModel {
                 FROM {$this->table} s
                 LEFT JOIN reviews r ON s.id = r.service_id
                 JOIN users u ON s.user_id = u.id";
-        $countSql = "SELECT COUNT(*) as count FROM {$this->table} s";
+        $countSql = "SELECT COUNT(DISTINCT s.id) as count FROM {$this->table} s"; // Ensure distinct count
         
         if (!empty($whereClause)) {
             $whereString = implode(' AND ', $whereClause);
@@ -186,7 +202,7 @@ class ServiceModel extends BaseModel {
             $countSql .= " WHERE {$whereString}";
         }
         
-        $sql .= " ORDER BY s.id DESC LIMIT ? OFFSET ?";
+        $sql .= " GROUP BY s.id ORDER BY s.id DESC LIMIT ? OFFSET ?"; // Group by service ID
         $params[] = $perPage;
         $params[] = $offset;
         $types .= 'ii';
@@ -209,5 +225,28 @@ class ServiceModel extends BaseModel {
                 'to' => min($offset + $perPage, $totalCount)
             ]
         ];
+    }
+
+    /**
+     * Get reviews for a service
+     * 
+     * @param int $serviceId Service ID
+     * @return array Array of reviews
+     */
+    public function getReviews($serviceId) {
+        $sql = "SELECT * from reviews where service_id = ?";
+        return $this->select($sql, [$serviceId], 'i');
+    }
+
+    /**
+     * Get average rating for a service
+     * 
+     * @param int $serviceId Service ID
+     * @return float Average rating
+     */
+    public function getRating($serviceId) {
+        $sql = "SELECT AVG(rating) as rating FROM reviews WHERE service_id = ?";
+        $result = $this->select($sql, [$serviceId], 'i');
+        return $result[0]['rating'] ?? 0;
     }
 } 

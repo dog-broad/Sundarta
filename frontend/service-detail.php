@@ -7,13 +7,12 @@
  * - GET /api/services/detail - Get service details
  * - GET /api/reviews/service - Get service reviews
  * - POST /api/reviews/service - Add service review (authenticated users only)
- * - POST /api/cart/item - Add service to cart
+ * - POST /api/appointments/create - Book a service appointment
  * 
  * Required JS Modules:
  * - modules/service-detail.js - Handles service detail view
  * - modules/reviews.js - Handles review display and submission
- * - modules/cart.js - Handles add to cart functionality
- * - utils/gallery.js - Handles service image gallery
+ * - utils/ui.js - Handles UI elements and modals
  */
 
 require_once __DIR__ . '/../backend/helpers/auth.php';
@@ -21,29 +20,30 @@ require 'partials/header.php';
 
 // Get service ID from URL parameter
 $service_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// Add user-authenticated class to body if user is logged in
+if (isLoggedIn()) {
+    echo '<script>document.body.classList.add("user-authenticated");</script>';
+}
 ?>
 
 <div class="container mx-auto py-8">
     <!-- Service Details Section -->
-    <div class="service-detail">
-        <!-- Will be populated by JS -->
-    </div>
-
-    <!-- Provider Information -->
-    <div class="provider-info">
+    <div id="service-detail" class="mb-12">
         <!-- Will be populated by JS -->
     </div>
 
     <!-- Reviews Section -->
-    <div class="reviews-section">
+    <div id="reviews-section" class="mt-12">
         <!-- Will be populated by JS -->
     </div>
-
-    <!-- Review Form (for authenticated users) -->
-    <div class="review-form">
-        <!-- Will be populated by JS if user is authenticated -->
-    </div>
+    
+    <!-- Alerts Container -->
+    <div class="alerts-container hidden"></div>
 </div>
+
+<!-- Include JavaScript Files -->
+<script type="module" src="/sundarta/assets/js/service-detail-page.js"></script>
 
 <?php
 require 'partials/footer.php';
