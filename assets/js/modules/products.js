@@ -25,6 +25,7 @@
 
 import API from '../utils/api.js';
 import UI from '../utils/ui.js';
+import ReviewsModule from './reviews.js';
 
 const ProductsModule = {
     /**
@@ -83,8 +84,8 @@ const ProductsModule = {
             
             if (response.success) {
                 return {
-                    products: response.data,
-                    pagination: response.pagination
+                    products: response.data.products,
+                    pagination: response.data.pagination
                 };
             }
             
@@ -119,7 +120,7 @@ const ProductsModule = {
     renderProductCard: (product) => {
         const images = JSON.parse(product.images);
         return `
-            <div class="card card-product">
+            <div class="card card-product product-card" data-product-id="${product.id}">
                 <img src="${images[0]}" 
                      alt="${product.name}" 
                      class="card-product-image">
@@ -129,7 +130,7 @@ const ProductsModule = {
                     <p class="text-text-light text-sm mb-2">${product.short_description || ''}</p>
                     <div class="flex items-center mb-2">
                         <div class="flex text-primary">
-                            ${ProductsModule.renderStarRating(product.rating || 0)}
+                            ${ReviewsModule.renderStarRating(product.rating || 0)}
                         </div>
                         <span class="text-xs ml-1">(${parseFloat(product.rating).toFixed(1) || 0})</span>
                     </div>
@@ -142,36 +143,6 @@ const ProductsModule = {
                 </div>
             </div>
         `;
-    },
-    
-    /**
-     * Render star rating HTML
-     * @param {number} rating - Rating value (0-5)
-     * @returns {string} - HTML for star rating
-     */
-    renderStarRating: (rating) => {
-        const fullStars = Math.floor(rating);
-        const halfStar = rating % 1 >= 0.5;
-        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-        
-        let starsHtml = '';
-        
-        // Add full stars
-        for (let i = 0; i < fullStars; i++) {
-            starsHtml += '<i class="fas fa-star"></i>';
-        }
-        
-        // Add half star if needed
-        if (halfStar) {
-            starsHtml += '<i class="fas fa-star-half-alt"></i>';
-        }
-        
-        // Add empty stars
-        for (let i = 0; i < emptyStars; i++) {
-            starsHtml += '<i class="far fa-star"></i>';
-        }
-        
-        return starsHtml;
     },
     
     /**
@@ -192,20 +163,70 @@ const ProductsModule = {
             return;
         }
         
-        const productsHtml = products.map(product => ProductsModule.renderProductCard(product)).join('');
+        // Create a grid container
+        let gridHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">`;
         
-        container.innerHTML = productsHtml;
+        // Add each product card to the grid
+        products.forEach(product => {
+            gridHtml += `<div class="product-grid-item">${ProductsModule.renderProductCard(product)}</div>`;
+        });
+
+        
+        // Close the grid container
+        gridHtml += `</div>`;
+        
+        // if this is being done in home page, use products else use grid
+        if (container.id === 'featured-products') {
+            const productsHtml = products.map(product => ProductsModule.renderProductCard(product)).join('');
+            container.innerHTML = productsHtml;
+        } else {
+            container.innerHTML = gridHtml;
+        }
         
         // Add event listeners to "Add to Cart" buttons
         const addToCartButtons = container.querySelectorAll('.add-to-cart-btn');
         addToCartButtons.forEach(button => {
             button.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering the card click
                 const productId = e.target.getAttribute('data-product-id');
                 // Here you would call a cart module function to add the product to cart
                 // For now, just show a success message
                 UI.showAlert('Product added to cart!', 'success');
             });
         });
+        
+        // Add click event to product cards for navigation to detail page
+        const productCards = container.querySelectorAll('.product-card');
+        productCards.forEach(card => {
+            card.style.cursor = 'pointer'; // Show pointer cursor on hover
+            card.addEventListener('click', () => {
+                const productId = card.getAttribute('data-product-id');
+                window.location.href = `/sundarta/product-detail?id=${productId}`;
+            });
+        });
+        
+        // Add some styling for the grid items
+        const style = document.createElement('style');
+        style.textContent = `
+            .product-grid-item .card-product {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .product-grid-item .card-product-body {
+                flex-grow: 1;
+            }
+            
+            .product-grid-item .card-product-image {
+                height: 200px;
+                object-fit: cover;
+                width: 100%;
+                border-top-left-radius: 0.375rem;
+                border-top-right-radius: 0.375rem;
+            }
+        `;
+        document.head.appendChild(style);
     },
     
     /**

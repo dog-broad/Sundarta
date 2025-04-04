@@ -68,8 +68,8 @@ const ServicesModule = {
             
             if (response.success) {
                 return {
-                    services: response.data,
-                    pagination: response.pagination
+                    services: response.data.services,
+                    pagination: response.data.pagination
                 };
             }
             

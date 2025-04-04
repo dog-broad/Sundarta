@@ -21,24 +21,30 @@ require 'partials/header.php';
 
 // Get product ID from URL parameter
 $product_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// Add user-authenticated class to body if user is logged in
+if (isLoggedIn()) {
+    echo '<script>document.body.classList.add("user-authenticated");</script>';
+}
 ?>
 
 <div class="container mx-auto py-8">
     <!-- Product Details Section -->
-    <div class="product-detail">
+    <div id="product-detail" class="mb-12">
         <!-- Will be populated by JS -->
     </div>
 
     <!-- Reviews Section -->
-    <div class="reviews-section">
+    <div id="reviews-section" class="mt-12">
         <!-- Will be populated by JS -->
     </div>
-
-    <!-- Review Form (for authenticated users) -->
-    <div class="review-form">
-        <!-- Will be populated by JS if user is authenticated -->
-    </div>
+    
+    <!-- Alerts Container -->
+    <div class="alerts-container hidden"></div>
 </div>
+
+<!-- Include JavaScript Files -->
+<script type="module" src="/sundarta/assets/js/product-detail-page.js"></script>
 
 <?php
 require 'partials/footer.php';
