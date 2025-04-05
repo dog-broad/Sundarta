@@ -59,10 +59,10 @@
                     &copy; <?php echo date('Y'); ?> Sundarta. All rights reserved.
                 </div>
                 <div class="flex gap-4">
-                    <img src="https://via.placeholder.com/40x25/f8f9fa/6c757d?text=VISA" alt="Visa" class="h-6">
-                    <img src="https://via.placeholder.com/40x25/f8f9fa/6c757d?text=MC" alt="MasterCard" class="h-6">
-                    <img src="https://via.placeholder.com/40x25/f8f9fa/6c757d?text=AMEX" alt="American Express" class="h-6">
-                    <img src="https://via.placeholder.com/40x25/f8f9fa/6c757d?text=PAY" alt="PayPal" class="h-6">
+                    <div class="h-6 w-10 bg-gray-300 text-center flex items-center justify-center text-xs font-semibold text-gray-700" alt="Visa">VISA</div>
+                    <div class="h-6 w-10 bg-gray-300 text-center flex items-center justify-center text-xs font-semibold text-gray-700" alt="MasterCard">MC</div>
+                    <div class="h-6 w-10 bg-gray-300 text-center flex items-center justify-center text-xs font-semibold text-gray-700" alt="American Express">AMEX</div>
+                    <div class="h-6 w-10 bg-gray-300 text-center flex items-center justify-center text-xs font-semibold text-gray-700" alt="PayPal">PAY</div>
                 </div>
             </div>
         </div>
@@ -74,6 +74,12 @@
     </footer>
     
     <script src="/sundarta/assets/js/script.js"></script>
+    <script type="module" src="/sundarta/assets/js/utils/charts.js"></script> <!-- Only needed for admin dashboard -->
+    <script type="module" src="/sundarta/assets/js/utils/validation.js"></script>
+    <script type="module" src="/sundarta/assets/js/utils/ui.js"></script>
+    <script type="module" src="/sundarta/assets/js/utils/price.js"></script>
+    <script type="module" src="/sundarta/assets/js/utils/pagination.js"></script>
+    <script type="module" src="/sundarta/assets/js/utils/filters.js"></script>
     <script>
         // Initialize toggle functionality for search and user dropdown
         document.getElementById('search-toggle').addEventListener('change', function() {

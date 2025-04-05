@@ -1,11 +1,14 @@
+# Enable URL rewriting
 RewriteEngine On
+
+# Set the base path for the application
 RewriteBase /sundarta/
 
 # Handle API requests
 RewriteCond %{REQUEST_URI} !^/sundarta/api/index.php$
 RewriteRule ^api/(.*)$ /sundarta/api/index.php?api_route=$1 [QSA,L]
 
-# Handle frontend requests
+# Handle frontend routes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ /sundarta/index.php?route=$1 [QSA,L]

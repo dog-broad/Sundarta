@@ -25,6 +25,21 @@ class ProductModel extends BaseModel {
     }
 
     /**
+     * Get a product by ID, Override the parent method to add reviews
+     * 
+     * @param int $id Product ID
+     * @return array|null Product data or null if not found
+     */
+    public function getById($id) {
+        $product = parent::getById($id);
+        if ($product) {
+            $product['reviews'] = $this->getReviews($id);
+            $product['rating'] = $this->getRating($id);
+        }
+        return $product;
+    }
+
+    /**
      * Update a product
      * 
      * @param int $id Product ID
@@ -70,7 +85,11 @@ class ProductModel extends BaseModel {
      * @return array Array of products
      */
     public function getByCategory($categoryId) {
-        $sql = "SELECT * FROM {$this->table} WHERE category = ?";
+        $sql = "SELECT p.*, COALESCE(AVG(r.rating), 0) AS rating 
+                FROM {$this->table} p
+                LEFT JOIN reviews r ON p.id = r.product_id
+                WHERE p.category = ?
+                GROUP BY p.id";
         return $this->select($sql, [$categoryId], 'i');
     }
 
@@ -81,19 +100,33 @@ class ProductModel extends BaseModel {
      * @return array Array of products
      */
     public function search($query) {
-        $sql = "SELECT * FROM {$this->table} WHERE name LIKE ? OR description LIKE ?";
+        $sql = "
+            SELECT p.*, COALESCE(AVG(r.rating), 0) AS rating 
+            FROM {$this->table} p
+            LEFT JOIN reviews r ON p.id = r.product_id
+            WHERE p.name LIKE ? OR p.description LIKE ?
+            GROUP BY p.id
+        ";
         $searchTerm = "%{$query}%";
         return $this->select($sql, [$searchTerm, $searchTerm], 'ss');
     }
 
     /**
-     * Get featured products (limited number of products)
+     * Get featured products with their average rating
      * 
      * @param int $limit Number of products to return
-     * @return array Array of products
+     * @return array Array of products with ratings
      */
     public function getFeatured($limit = 6) {
-        $sql = "SELECT * FROM {$this->table} ORDER BY id DESC LIMIT ?";
+        $sql = "
+            SELECT p.*, COALESCE(AVG(r.rating), 0) AS rating 
+            FROM {$this->table} p
+            LEFT JOIN reviews r ON p.id = r.product_id
+            GROUP BY p.id
+            ORDER BY p.id DESC
+            LIMIT ?
+        ";
+
         return $this->select($sql, [$limit], 'i');
     }
 
@@ -156,8 +189,10 @@ class ProductModel extends BaseModel {
             $types .= 'ss';
         }
         
-        $sql = "SELECT * FROM {$this->table}";
-        $countSql = "SELECT COUNT(*) as count FROM {$this->table}";
+        $sql = "SELECT p.*, COALESCE(AVG(r.rating), 0) AS rating 
+                FROM {$this->table} p
+                LEFT JOIN reviews r ON p.id = r.product_id";
+        $countSql = "SELECT COUNT(DISTINCT p.id) as count FROM {$this->table} p"; // Ensure distinct count
         
         if (!empty($whereClause)) {
             $whereString = implode(' AND ', $whereClause);
@@ -165,7 +200,7 @@ class ProductModel extends BaseModel {
             $countSql .= " WHERE {$whereString}";
         }
         
-        $sql .= " ORDER BY id DESC LIMIT ? OFFSET ?";
+        $sql .= " GROUP BY p.id ORDER BY p.id DESC LIMIT ? OFFSET ?"; // Group by product ID
         $params[] = $perPage;
         $params[] = $offset;
         $types .= 'ii';
@@ -188,5 +223,28 @@ class ProductModel extends BaseModel {
                 'to' => min($offset + $perPage, $totalCount)
             ]
         ];
+    }
+
+    /**
+     * Get product reviews
+     * 
+     * @param int $productId Product ID
+     * @return array Array of reviews
+     */
+    public function getReviews($productId) {
+        $sql = "SELECT * FROM reviews WHERE product_id = ?";
+        return $this->select($sql, [$productId], 'i');
+    }
+
+    /**
+     * Get product rating
+     * 
+     * @param int $productId Product ID
+     * @return float Product rating
+     */
+    public function getRating($productId) {
+        $sql = "SELECT AVG(rating) FROM reviews WHERE product_id = ?";
+        $result = $this->select($sql, [$productId], 'i');
+        return $result[0]['AVG(rating)'] ?? 0;
     }
 } 
