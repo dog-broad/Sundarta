@@ -177,7 +177,13 @@ const ProductsModule = {
         // Close the grid container
         gridHtml += `</div>`;
         
-        container.innerHTML = gridHtml;
+        // if this is being done in home page, use products else use grid
+        if (container.id === 'featured-products') {
+            const productsHtml = products.map(product => ProductsModule.renderProductCard(product)).join('');
+            container.innerHTML = productsHtml;
+        } else {
+            container.innerHTML = gridHtml;
+        }
         
         // Add event listeners to "Add to Cart" buttons
         const addToCartButtons = container.querySelectorAll('.add-to-cart-btn');

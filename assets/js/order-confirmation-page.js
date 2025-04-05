@@ -30,6 +30,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             // Render shipping information
             renderShippingInfo(order);
+            
+            // Update buttons with correct URLs
+            updateActionButtons();
         } else {
             UI.showError('Failed to load order details');
         }
@@ -52,25 +55,37 @@ function renderOrderDetails(order) {
     
     // Add items to details
     order.items.forEach(item => {
+        const itemPrice = parseFloat(item.price || 0);
+        const itemQuantity = parseInt(item.quantity || 1);
+        const itemTotal = itemPrice * itemQuantity;
+        
         itemsHtml += `
             <div class="flex justify-between py-2 border-b">
                 <div>
-                    <div class="font-medium">${item.name}</div>
+                    <div class="font-medium">${item.name || 'Unknown Item'}</div>
                     <div class="text-sm text-text-light">
-                        ${item.type === 'service' ? 'Service' : 'Product'} x ${item.quantity}
+                        ${item.type === 'service' ? 'Service' : 'Product'} x ${itemQuantity}
                     </div>
                 </div>
-                <div class="font-semibold">₹${parseFloat(item.price * item.quantity).toFixed(2)}</div>
+                <div class="font-semibold">₹${itemTotal.toFixed(2)}</div>
             </div>
         `;
     });
+    
+    // Calculate totals from items if not directly available
+    const subtotal = order.subtotal ? parseFloat(order.subtotal) : 
+                     order.items.reduce((sum, item) => sum + (parseFloat(item.price || 0) * parseInt(item.quantity || 1)), 0);
+    
+    const tax = order.tax ? parseFloat(order.tax) : (subtotal * 0.18); // Default 18% tax if not specified
+    const shippingFee = order.shipping_fee ? parseFloat(order.shipping_fee) : 0;
+    const total = order.total ? parseFloat(order.total) : (subtotal + tax + shippingFee);
     
     // Build details HTML
     const detailsHtml = `
         <div class="mb-4">
             <div class="flex justify-between text-text-light mb-2">
                 <span>Order Date</span>
-                <span>${new Date(order.created_at).toLocaleString()}</span>
+                <span>${new Date(order.created_at || Date.now()).toLocaleString()}</span>
             </div>
             <div class="flex justify-between text-text-light mb-2">
                 <span>Payment Method</span>
@@ -78,7 +93,7 @@ function renderOrderDetails(order) {
             </div>
             <div class="flex justify-between text-text-light mb-2">
                 <span>Status</span>
-                <span class="badge ${getStatusBadgeClass(order.status)}">${order.status}</span>
+                <span class="badge badge-${getStatusBadgeClass(order.status || 'pending')}">${order.status || 'Pending'}</span>
             </div>
         </div>
         
@@ -90,19 +105,19 @@ function renderOrderDetails(order) {
         <div class="space-y-2 mb-4">
             <div class="flex justify-between">
                 <span>Subtotal</span>
-                <span>₹${parseFloat(order.subtotal).toFixed(2)}</span>
+                <span>₹${subtotal.toFixed(2)}</span>
             </div>
             <div class="flex justify-between">
                 <span>Tax</span>
-                <span>₹${parseFloat(order.tax).toFixed(2)}</span>
+                <span>₹${tax.toFixed(2)}</span>
             </div>
             <div class="flex justify-between">
                 <span>Shipping</span>
-                <span>${order.shipping_fee === 0 ? 'Free' : `₹${parseFloat(order.shipping_fee).toFixed(2)}`}</span>
+                <span>${shippingFee === 0 ? 'Free' : `₹${shippingFee.toFixed(2)}`}</span>
             </div>
             <div class="flex justify-between font-semibold text-lg pt-2 border-t">
                 <span>Total</span>
-                <span>₹${parseFloat(order.total).toFixed(2)}</span>
+                <span>₹${total.toFixed(2)}</span>
             </div>
         </div>
     `;
@@ -124,12 +139,12 @@ function renderShippingInfo(order) {
     const shippingHtml = `
         <div class="space-y-2">
             <div>
-                <span class="font-semibold">${shipping.name}</span>
+                <span class="font-semibold">${shipping.name || 'Name Not Available'}</span>
             </div>
-            <div>${shipping.email}</div>
-            <div>${shipping.phone}</div>
-            <div class="pt-2">${shipping.address}</div>
-            <div>${shipping.city}, ${shipping.state} ${shipping.pincode}</div>
+            <div>${shipping.email || 'Email Not Available'}</div>
+            <div>${shipping.phone || 'Phone Not Available'}</div>
+            <div class="pt-2">${shipping.address || 'Address Not Available'}</div>
+            <div>${shipping.city || ''}, ${shipping.state || ''} ${shipping.pincode || ''}</div>
         </div>
     `;
     
@@ -155,5 +170,20 @@ function getStatusBadgeClass(status) {
             return 'badge-danger';
         default:
             return 'badge-secondary';
+    }
+}
+
+/**
+ * Update action buttons with correct URLs
+ */
+function updateActionButtons() {
+    const continueShoppingBtn = document.querySelector('a[href="/sundarta/products"]');
+    if (continueShoppingBtn) {
+        continueShoppingBtn.href = URL.path('products');
+    }
+    
+    const viewOrdersBtn = document.querySelector('a[href="/sundarta/orders"]');
+    if (viewOrdersBtn) {
+        viewOrdersBtn.href = URL.path('orders');
     }
 } 

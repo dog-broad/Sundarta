@@ -139,6 +139,7 @@ $frontendRoutes = [
     'cart' => 'frontend/cart.php',
     'checkout' => 'frontend/checkout.php',
     'order-confirmation' => 'frontend/order-confirmation.php',
+    'orders' => 'frontend/orders.php',
     
     // User account
     'login' => 'frontend/login.php',

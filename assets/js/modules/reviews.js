@@ -10,6 +10,8 @@
  * API Endpoints Used:
  * - GET /api/reviews/product - Get product reviews
  * - POST /api/reviews/product - Add product review
+ * - GET /api/reviews/service - Get service reviews
+ * - POST /api/reviews/service - Add service review
  * - GET /api/reviews/my-reviews - Get user's reviews
  * - GET /api/reviews/detail - Get review details (for editing)
  * - PUT /api/reviews/detail - Update a review
@@ -22,17 +24,18 @@ import Pagination from '../utils/pagination.js';
 
 const ReviewsModule = {
     /**
-     * Fetch reviews for a product
-     * @param {number} productId - Product ID
+     * Fetch reviews for a product or service
+     * @param {number} id - Product or Service ID
+     * @param {string} type - 'product' or 'service'
      * @param {Object} options - Pagination options
      * @returns {Promise<Object>} - Reviews data
      */
-    getProductReviews: async (productId, options = {}) => {
+    getReviews: async (id, type, options = {}) => {
         const { page = 1, limit = 5 } = options;
         
         try {
-            const response = await API.get('/reviews/product', { 
-                product_id: productId,
+            const response = await API.get(`/reviews/${type}`, { 
+                [`${type}_id`]: id,
                 page,
                 limit
             });
@@ -47,7 +50,7 @@ const ReviewsModule = {
                 total_reviews: 0
             };
         } catch (error) {
-            console.error('Error fetching product reviews:', error);
+            console.error(`Error fetching ${type} reviews:`, error);
             return {
                 reviews: [],
                 average_rating: 0,
@@ -57,23 +60,24 @@ const ReviewsModule = {
     },
     
     /**
-     * Submit a new product review
-     * @param {number} productId - Product ID
+     * Submit a new product or service review
+     * @param {number} id - Product or Service ID
+     * @param {string} type - 'product' or 'service'
      * @param {number} rating - Rating (1-5)
      * @param {string} review - Review text
      * @returns {Promise<boolean>} - Success status
      */
-    submitProductReview: async (productId, rating, review) => {
+    submitReview: async (id, type, rating, review) => {
         try {
-            const response = await API.post('/reviews/product', {
-                product_id: productId,
+            const response = await API.post(`/reviews/${type}`, {
+                [`${type}_id`]: id,
                 rating,
                 review
             });
             
             return response.success;
         } catch (error) {
-            console.error('Error submitting review:', error);
+            console.error(`Error submitting ${type} review:`, error);
             return false;
         }
     },
@@ -285,10 +289,11 @@ const ReviewsModule = {
     /**
      * Initialize reviews section
      * @param {string} containerId - ID of container element
-     * @param {number} productId - Product ID
+     * @param {number} id - Product or Service ID
+     * @param {string} type - 'product' or 'service'
      * @param {boolean} isAuthenticated - Whether user is authenticated
      */
-    initProductReviews: async (containerId, productId, isAuthenticated = false) => {
+    initReviews: async (containerId, id, type, isAuthenticated = false) => {
         const container = document.getElementById(containerId);
         if (!container) return;
         
@@ -322,7 +327,7 @@ const ReviewsModule = {
                             
                             <div class="mb-4">
                                 <label for="review-text" class="input-label">Your Review</label>
-                                <textarea id="review-text" class="input-text" rows="4" placeholder="Share your experience with this product..."></textarea>
+                                <textarea id="review-text" class="input-text" rows="4" placeholder="Share your experience with this ${type}..."></textarea>
                             </div>
                             
                             <button type="submit" class="btn btn-primary">Submit Review</button>
@@ -365,8 +370,9 @@ const ReviewsModule = {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';
                 
                 // Submit review
-                const success = await ReviewsModule.submitProductReview(
-                    productId,
+                const success = await ReviewsModule.submitReview(
+                    id,
+                    type,
                     selectedRating,
                     reviewText
                 );
@@ -415,7 +421,7 @@ const ReviewsModule = {
             `;
             
             // Fetch reviews
-            const data = await ReviewsModule.getProductReviews(productId, { page, limit });
+            const data = await ReviewsModule.getReviews(id, type, { page, limit });
             
             // Update summary
             summaryContainer.innerHTML = `

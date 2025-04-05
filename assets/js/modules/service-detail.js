@@ -449,7 +449,7 @@ const ServiceDetailModule = {
         }
         
         // Initialize reviews section
-        ReviewsModule.initProductReviews('reviews-section', service.id, isAuthenticated);
+        ReviewsModule.initReviews('reviews-section', service.id, 'service', isAuthenticated);
     },
     
     /**

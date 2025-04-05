@@ -96,6 +96,12 @@ require 'partials/header.php';
                 </div>
                 
                 <button type="submit" class="btn btn-primary w-full py-3">Place Order</button>
+                
+                <div class="text-center mt-4">
+                    <a href="/sundarta/orders" class="text-sm text-primary hover:underline">
+                        <i class="fas fa-history mr-1"></i> View Order History
+                    </a>
+                </div>
             </form>
         </div>
         

@@ -60,7 +60,13 @@ require 'partials/header.php';
             <!-- Alerts Container -->
             <div class="alerts-container"></div>
             
-            <button id="checkout-btn" class="btn btn-primary w-full">Proceed to Checkout</button>
+            <button id="checkout-btn" class="btn btn-primary w-full mb-2">Proceed to Checkout</button>
+            
+            <div class="text-center mt-4">
+                <a href="/sundarta/orders" class="text-sm text-primary hover:underline">
+                    <i class="fas fa-history mr-1"></i> View Order History
+                </a>
+            </div>
         </div>
     </div>
     

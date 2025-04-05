@@ -52,4 +52,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             URL.redirect('checkout');
         });
     }
+    
+    // Update order history link
+    const orderHistoryLink = document.querySelector('a[href="/sundarta/orders"]');
+    if (orderHistoryLink) {
+        orderHistoryLink.href = URL.path('orders');
+    }
 }); 

@@ -199,7 +199,13 @@ const ServicesModule = {
         // Close the grid container
         gridHtml += `</div>`;
         
-        container.innerHTML = gridHtml;
+        // if this is being done in home page, use services else use grid
+        if (container.id === 'featured-services') {
+            const servicesHtml = services.map(service => ServicesModule.renderServiceCard(service)).join('');
+            container.innerHTML = servicesHtml;
+        } else {
+            container.innerHTML = gridHtml;
+        }
         
         // Add event listeners to "Add to Cart" buttons
         const addToCartButtons = container.querySelectorAll('.add-to-cart-btn');
