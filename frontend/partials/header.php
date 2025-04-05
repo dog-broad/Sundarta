@@ -61,7 +61,7 @@
                             <label for="user-toggle" class="cursor-pointer text-text-light hover:text-primary transition-colors">
                                 <i class="fas fa-user-circle"></i>
                             </label>
-                            <div id="user-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-surface rounded-md shadow-lg hidden z-1000">
+                            <div id="user-dropdown" class="absolute right-0 top-full mt-2 w-48 bg-surface rounded-md shadow-lg hidden z-50">
                                 <div class="p-3 border-b border-gray-200">
                                     <span class="block font-semibold">Hello, <?php echo $_SESSION['username']; ?></span>
                                 </div>
