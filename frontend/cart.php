@@ -56,11 +56,18 @@ require 'partials/header.php';
                     <span id="cart-total">₹0.00</span>
                 </div>
             </div>
+
+            <!-- Alerts Container -->
+            <div class="alerts-container"></div>
             
             <button id="checkout-btn" class="btn btn-primary w-full">Proceed to Checkout</button>
         </div>
     </div>
+    
 </div>
+
+<!-- Include JavaScript Files -->
+<script type="module" src="/sundarta/assets/js/cart-page.js"></script>
 
 <?php
 require 'partials/footer.php';

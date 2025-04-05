@@ -6,11 +6,14 @@
  * - Displaying services in a grid
  * - Filtering and sorting services
  * - Service search
+ * - Adding services to cart
  */
 
 import API from '../utils/api.js';
 import UI from '../utils/ui.js';
 import ReviewsModule from './reviews.js';
+import Cart from './cart.js';
+import URL from '../utils/url.js';
 
 const ServicesModule = {
     /**
@@ -118,26 +121,6 @@ const ServicesModule = {
     },
     
     /**
-     * Add service to cart
-     * @param {number} serviceId - Service ID
-     * @param {number} quantity - Quantity to add
-     * @returns {Promise<boolean>} - Success status
-     */
-    addToCart: async (serviceId, quantity = 1) => {
-        try {
-            const response = await API.post('/cart/item', {
-                service_id: serviceId,
-                quantity
-            });
-            
-            return response.success;
-        } catch (error) {
-            console.error('Error adding service to cart:', error);
-            return false;
-        }
-    },
-    
-    /**
      * Render service card HTML
      * @param {Object} service - Service data
      * @returns {string} - HTML for service card
@@ -220,38 +203,7 @@ const ServicesModule = {
         
         // Add event listeners to "Add to Cart" buttons
         const addToCartButtons = container.querySelectorAll('.add-to-cart-btn');
-        addToCartButtons.forEach(button => {
-            button.addEventListener('click', async (e) => {
-                e.stopPropagation(); // Prevent triggering the card click
-                
-                const serviceId = e.target.getAttribute('data-service-id');
-                const originalBtnText = e.target.innerHTML;
-                
-                // Show loading state
-                e.target.disabled = true;
-                e.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                
-                // Add to cart
-                const success = await ServicesModule.addToCart(serviceId);
-                
-                // Reset button state
-                e.target.disabled = false;
-                e.target.innerHTML = originalBtnText;
-                
-                if (success) {
-                    UI.showSuccess('Service added to cart!');
-                    
-                    // Update cart count in header if it exists
-                    const cartCountElement = document.querySelector('.cart-count');
-                    if (cartCountElement) {
-                        const currentCount = parseInt(cartCountElement.textContent);
-                        cartCountElement.textContent = currentCount + 1;
-                    }
-                } else {
-                    UI.showError('Failed to add service to cart');
-                }
-            });
-        });
+        addToCartEventListeners(addToCartButtons);
         
         // Add click event to service cards for navigation to detail page
         const serviceCards = container.querySelectorAll('.service-card');
@@ -259,7 +211,7 @@ const ServicesModule = {
             card.style.cursor = 'pointer'; // Show pointer cursor on hover
             card.addEventListener('click', () => {
                 const serviceId = card.getAttribute('data-service-id');
-                window.location.href = `/sundarta/service-detail?id=${serviceId}`;
+                URL.redirect(`service-detail?id=${serviceId}`);
             });
         });
         
@@ -324,6 +276,38 @@ const ServicesModule = {
         // Render services
         ServicesModule.renderServicesGrid(services, container);
     }
+};
+
+/**
+ * Add event listeners to "Add to Cart" buttons
+ * @param {NodeList} addToCartButtons - List of Add to Cart buttons
+ */
+const addToCartEventListeners = (addToCartButtons) => {
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Prevent triggering the card click
+            
+            const serviceId = e.target.getAttribute('data-service-id');
+            const originalBtnText = e.target.innerHTML;
+            
+            // Show loading state
+            e.target.disabled = true;
+            e.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            // Add to cart using the Cart module
+            const success = await Cart.addItem('service', serviceId, 1);
+            
+            // Reset button state
+            e.target.disabled = false;
+            e.target.innerHTML = originalBtnText;
+            
+            if (success) {
+                UI.showSuccess('Service added to cart!');
+            } else {
+                UI.showError('Failed to add service to cart');
+            }
+        });
+    });
 };
 
 export default ServicesModule; 

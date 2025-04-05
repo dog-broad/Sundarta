@@ -9,12 +9,13 @@
  * 
  * API Endpoints Used:
  * - GET /api/products/detail - Get product details
- * - POST /api/cart/item - Add to cart
+ * - POST /api/cart/item - Add to cart via Cart module
  */
 
 import API from '../utils/api.js';
 import UI from '../utils/ui.js';
 import ReviewsModule from './reviews.js';
+import Cart from './cart.js';
 
 const ProductDetailModule = {
     /**
@@ -34,26 +35,6 @@ const ProductDetailModule = {
         } catch (error) {
             console.error('Error fetching product details:', error);
             return null;
-        }
-    },
-    
-    /**
-     * Add product to cart
-     * @param {number} productId - Product ID
-     * @param {number} quantity - Quantity to add
-     * @returns {Promise<boolean>} - Success status
-     */
-    addToCart: async (productId, quantity = 1) => {
-        try {
-            const response = await API.post('/cart/item', {
-                product_id: productId,
-                quantity
-            });
-            
-            return response.success;
-        } catch (error) {
-            console.error('Error adding product to cart:', error);
-            return false;
         }
     },
     
@@ -381,8 +362,8 @@ const ProductDetailModule = {
                 addToCartBtn.disabled = true;
                 addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adding...';
                 
-                // Add to cart
-                const success = await ProductDetailModule.addToCart(productId, quantity);
+                // Add to cart using Cart module
+                const success = await Cart.addItem('product', productId, quantity);
                 
                 // Reset button state
                 addToCartBtn.disabled = false;
@@ -390,13 +371,6 @@ const ProductDetailModule = {
                 
                 if (success) {
                     UI.showSuccess('Product added to cart!');
-                    
-                    // Update cart count in header if it exists
-                    const cartCountElement = document.querySelector('.cart-count');
-                    if (cartCountElement) {
-                        const currentCount = parseInt(cartCountElement.textContent);
-                        cartCountElement.textContent = currentCount + quantity;
-                    }
                 } else {
                     UI.showError('Failed to add product to cart. Please try again.');
                 }
@@ -407,14 +381,11 @@ const ProductDetailModule = {
         const buyNowBtn = container.querySelector('#buy-now-btn');
         
         if (buyNowBtn) {
-            buyNowBtn.disabled = true; // Disable the button
-            buyNowBtn.title = 'This feature is yet to be implemented'; // Hover message
-            
             buyNowBtn.addEventListener('click', async () => {
                 const quantity = parseInt(quantityInput.value);
                 
-                // Add to cart first
-                const success = await ProductDetailModule.addToCart(productId, quantity);
+                // Add to cart first using Cart module
+                const success = await Cart.addItem('product', productId, quantity);
                 
                 if (success) {
                     // Redirect to checkout

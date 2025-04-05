@@ -63,17 +63,20 @@ const UI = {
             </div>
         `;
         
-        // Add to alerts container or create one
+        // Find or create alerts container
         let alertsContainer = document.querySelector('.alerts-container');
-        if (alertsContainer.classList.contains('hidden')) {
-            alertsContainer.classList.remove('hidden');
-        }
+        
         if (!alertsContainer) {
+            // Create container if it doesn't exist
             alertsContainer = document.createElement('div');
             alertsContainer.className = 'alerts-container';
             document.body.appendChild(alertsContainer);
+        } else if (alertsContainer.classList.contains('hidden')) {
+            // Make sure container is visible
+            alertsContainer.classList.remove('hidden');
         }
         
+        // Add the alert to the container
         alertsContainer.appendChild(alert);
         
         // Add animation class for showing alert
@@ -88,10 +91,6 @@ const UI = {
             }, duration);
         }
         
-        // reset the alert container
-        alert.classList.remove('show');
-        alert.classList.add('hide');
-        
         return alert;
     },
 
@@ -100,17 +99,21 @@ const UI = {
      * @param {HTMLElement} alert 
      */
     closeAlert: (alert) => {
+        if (!alert) return;
+        
         alert.classList.remove('show');
         alert.classList.add('hide');
         
         // Remove after animation completes
         setTimeout(() => {
-            alert.remove();
-            
-            // Remove container if empty
-            const alertsContainer = document.querySelector('.alerts-container');
-            if (alertsContainer && !alertsContainer.hasChildNodes()) {
-                alertsContainer.remove();
+            if (alert && alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+                
+                // Check if container is empty
+                const alertsContainer = document.querySelector('.alerts-container');
+                if (alertsContainer && alertsContainer.children.length === 0) {
+                    alertsContainer.classList.add('hidden');
+                }
             }
         }, 300);
     },

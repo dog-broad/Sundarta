@@ -21,11 +21,14 @@
  * - Displaying products in a grid
  * - Filtering and sorting products
  * - Product search
+ * - Adding products to cart
  */
 
 import API from '../utils/api.js';
 import UI from '../utils/ui.js';
 import ReviewsModule from './reviews.js';
+import Cart from './cart.js';
+import URL from '../utils/url.js';
 
 const ProductsModule = {
     /**
@@ -170,28 +173,37 @@ const ProductsModule = {
         products.forEach(product => {
             gridHtml += `<div class="product-grid-item">${ProductsModule.renderProductCard(product)}</div>`;
         });
-
         
         // Close the grid container
         gridHtml += `</div>`;
         
-        // if this is being done in home page, use products else use grid
-        if (container.id === 'featured-products') {
-            const productsHtml = products.map(product => ProductsModule.renderProductCard(product)).join('');
-            container.innerHTML = productsHtml;
-        } else {
-            container.innerHTML = gridHtml;
-        }
+        container.innerHTML = gridHtml;
         
         // Add event listeners to "Add to Cart" buttons
         const addToCartButtons = container.querySelectorAll('.add-to-cart-btn');
         addToCartButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
+            button.addEventListener('click', async (e) => {
                 e.stopPropagation(); // Prevent triggering the card click
+                
                 const productId = e.target.getAttribute('data-product-id');
-                // Here you would call a cart module function to add the product to cart
-                // For now, just show a success message
-                UI.showAlert('Product added to cart!', 'success');
+                const originalBtnText = e.target.innerHTML;
+                
+                // Show loading state
+                e.target.disabled = true;
+                e.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                // Add to cart
+                const success = await Cart.addItem('product', productId, 1);
+                
+                // Reset button state
+                e.target.disabled = false;
+                e.target.innerHTML = originalBtnText;
+                
+                if (success) {
+                    UI.showSuccess('Product added to cart!');
+                } else {
+                    UI.showError('Failed to add product to cart');
+                }
             });
         });
         
@@ -201,7 +213,7 @@ const ProductsModule = {
             card.style.cursor = 'pointer'; // Show pointer cursor on hover
             card.addEventListener('click', () => {
                 const productId = card.getAttribute('data-product-id');
-                window.location.href = `/sundarta/product-detail?id=${productId}`;
+                URL.redirect(`product-detail?id=${productId}`);
             });
         });
         
@@ -224,6 +236,15 @@ const ProductsModule = {
                 width: 100%;
                 border-top-left-radius: 0.375rem;
                 border-top-right-radius: 0.375rem;
+            }
+            
+            .card-product {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            
+            .card-product:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             }
         `;
         document.head.appendChild(style);

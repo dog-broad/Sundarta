@@ -8,7 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Handle different request methods
-if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new CartController();
+    $controller->addToCart();
+} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $controller = new CartController();
     $controller->updateCartItem();
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {

@@ -2,17 +2,14 @@
 /**
  * Checkout Page
  * 
- * This page handles the checkout process for cart items.
+ * This page handles the checkout process for products and services.
  * It integrates with the following API endpoints:
  * - GET /api/cart - Get cart contents
- * - GET /api/cart/check-stock - Verify stock availability
- * - POST /api/orders/checkout - Create order from cart
+ * - POST /api/orders/checkout - Process checkout
  * 
  * Required JS Modules:
- * - modules/checkout.js - Handles checkout process
- * - modules/cart.js - Handles cart data
- * - utils/price.js - Handles price formatting
- * - utils/validation.js - Handles form validation
+ * - modules/cart.js - Handles cart operations
+ * - checkout-page.js - Handles the checkout process
  */
 
 require_once __DIR__ . '/../backend/helpers/auth.php';
@@ -27,30 +24,92 @@ if (!isAuthenticated()) {
 require 'partials/header.php';
 ?>
 
-<div class="container mx-auto py-8">
-    <!-- Order Summary -->
-    <div class="order-summary">
-        <!-- Will be populated by JS -->
+<div class="container mx-auto px-4 py-8">
+    <h1 class="font-heading text-4xl mb-8">Checkout</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Checkout Form -->
+        <div class="lg:col-span-2">
+            <form id="checkout-form" class="space-y-6">
+                <!-- Shipping Information -->
+                <div class="card p-6">
+                    <h2 class="font-heading text-xl mb-4">Shipping Information</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label for="name" class="input-label">Full Name</label>
+                            <input type="text" id="name" name="name" class="input-text" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="email" class="input-label">Email</label>
+                            <input type="email" id="email" name="email" class="input-text" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="phone" class="input-label">Phone</label>
+                            <input type="tel" id="phone" name="phone" class="input-text" required>
+                        </div>
+                        
+                        <div class="input-group md:col-span-2">
+                            <label for="address" class="input-label">Address</label>
+                            <textarea id="address" name="address" class="input-text" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="city" class="input-label">City</label>
+                            <input type="text" id="city" name="city" class="input-text" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="state" class="input-label">State</label>
+                            <input type="text" id="state" name="state" class="input-text" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="pincode" class="input-label">Pincode</label>
+                            <input type="text" id="pincode" name="pincode" class="input-text" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Method -->
+                <div class="card p-6">
+                    <h2 class="font-heading text-xl mb-4">Payment Method</h2>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="radio" name="payment_method" id="cod" value="cod" class="mr-2" checked>
+                            <label for="cod">
+                                <span class="font-medium">Cash on Delivery</span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="radio" name="payment_method" id="online" value="online" class="mr-2">
+                            <label for="online">
+                                <span class="font-medium">Online Payment</span>
+                                <span class="text-sm text-text-light ml-2">(Coming Soon)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-full py-3">Place Order</button>
+            </form>
+        </div>
+        
+        <!-- Order Summary -->
+        <div>
+            <div class="card p-6 sticky top-4" id="order-summary">
+                <!-- Order summary will be loaded dynamically -->
+            </div>
+        </div>
     </div>
-
-    <!-- Checkout Form -->
-    <form id="checkout-form" class="checkout-form">
-        <!-- Shipping Information -->
-        <div class="shipping-info">
-            <!-- Will be populated by JS -->
-        </div>
-
-        <!-- Payment Information -->
-        <div class="payment-info">
-            <!-- Will be populated by JS -->
-        </div>
-
-        <!-- Place Order Button -->
-        <div class="order-actions">
-            <!-- Will be populated by JS -->
-        </div>
-    </form>
 </div>
+
+<!-- Include JavaScript Files -->
+<script type="module" src="/sundarta/assets/js/checkout-page.js"></script>
 
 <?php
 require 'partials/footer.php';

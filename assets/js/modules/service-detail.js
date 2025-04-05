@@ -9,12 +9,13 @@
  * 
  * API Endpoints Used:
  * - GET /api/services/detail - Get service details
- * - POST /api/cart/item - Add to cart
+ * - POST /api/cart/item - Add to cart via Cart module
  */
 
 import API from '../utils/api.js';
 import UI from '../utils/ui.js';
 import ReviewsModule from './reviews.js';
+import Cart from './cart.js';
 
 const ServiceDetailModule = {
     /**
@@ -34,38 +35,6 @@ const ServiceDetailModule = {
         } catch (error) {
             console.error('Error fetching service details:', error);
             return null;
-        }
-    },
-    
-    /**
-     * Add service to cart
-     * @param {number} serviceId - Service ID
-     * @param {number} quantity - Quantity to add (usually 1 for services)
-     * @param {string} selectedDate - Optional selected date for appointment
-     * @param {string} selectedTime - Optional selected time for appointment
-     * @returns {Promise<boolean>} - Success status
-     */
-    addToCart: async (serviceId, quantity = 1, selectedDate = null, selectedTime = null) => {
-        try {
-            const cartItem = {
-                service_id: serviceId,
-                quantity
-            };
-            
-            // Add appointment details if provided
-            if (selectedDate && selectedTime) {
-                cartItem.appointment = {
-                    date: selectedDate,
-                    time: selectedTime
-                };
-            }
-            
-            const response = await API.post('/cart/item', cartItem);
-            
-            return response.success;
-        } catch (error) {
-            console.error('Error adding service to cart:', error);
-            return false;
         }
     },
     
@@ -387,40 +356,61 @@ const ServiceDetailModule = {
             });
         }
         
-        // Add to cart button
+        // Set up Add to Cart button
         const addToCartBtn = container.querySelector('#add-to-cart-btn');
-        
         if (addToCartBtn) {
             addToCartBtn.addEventListener('click', async () => {
-                const quantity = parseInt(quantityInput.value);
-                const selectedDate = document.getElementById('appointment-date').value;
-                const selectedTime = document.getElementById('appointment-time').value;
+                // Check if user is authenticated
+                if (!isAuthenticated) {
+                    // Show login prompt
+                    UI.showModal({
+                        title: 'Login Required',
+                        content: 'You need to be logged in to add items to your cart.',
+                        buttons: [
+                            {
+                                text: 'Cancel',
+                                class: 'btn-secondary'
+                            },
+                            {
+                                text: 'Login',
+                                class: 'btn-primary',
+                                callback: () => {
+                                    window.location.href = `/sundarta/login?redirect=${encodeURIComponent(window.location.href)}`;
+                                }
+                            }
+                        ]
+                    });
+                    return;
+                }
                 
-                // Show loading state
-                const originalBtnText = addToCartBtn.innerHTML;
-                addToCartBtn.disabled = true;
-                addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adding...';
+                const quantity = parseInt(quantityInput.value);
+                const appointmentDate = document.getElementById('appointment-date').value;
+                const appointmentTime = document.getElementById('appointment-time').value;
+                
+                let appointmentDetails = null;
+                
+                if (appointmentDate && appointmentTime) {
+                    appointmentDetails = {
+                        date: appointmentDate,
+                        time: appointmentTime
+                    };
+                }
                 
                 // Add to cart
                 const success = await ServiceDetailModule.addToCart(
-                    serviceId, 
+                    service.id, 
                     quantity,
-                    selectedDate,
-                    selectedTime
+                    appointmentDetails
                 );
                 
-                // Reset button state
-                addToCartBtn.disabled = false;
-                addToCartBtn.innerHTML = originalBtnText;
-                
                 if (success) {
-                    UI.showSuccess('Service added to cart!');
+                    UI.showSuccess('Service added to cart successfully!');
                     
-                    // Update cart count in header if it exists
+                    // Update cart count in header if applicable
                     const cartCountElement = document.querySelector('.cart-count');
                     if (cartCountElement) {
                         const currentCount = parseInt(cartCountElement.textContent);
-                        cartCountElement.textContent = currentCount + quantity;
+                        cartCountElement.textContent = currentCount + 1;
                     }
                 } else {
                     UI.showError('Failed to add service to cart. Please try again.');
@@ -437,13 +427,17 @@ const ServiceDetailModule = {
                 const selectedDate = document.getElementById('appointment-date').value;
                 const selectedTime = document.getElementById('appointment-time').value;
                 
-                // Add to cart first
-                const success = await ServiceDetailModule.addToCart(
-                    serviceId, 
-                    quantity,
-                    selectedDate,
-                    selectedTime
-                );
+                // Create appointment options if date and time are selected
+                const options = {};
+                if (selectedDate && selectedTime) {
+                    options.appointment = {
+                        date: selectedDate,
+                        time: selectedTime
+                    };
+                }
+                
+                // Add to cart first using Cart module
+                const success = await Cart.addItem('service', service.id, quantity, options);
                 
                 if (success) {
                     // Redirect to checkout
@@ -455,7 +449,55 @@ const ServiceDetailModule = {
         }
         
         // Initialize reviews section
-        ReviewsModule.initProductReviews('reviews-section', serviceId, isAuthenticated);
+        ReviewsModule.initProductReviews('reviews-section', service.id, isAuthenticated);
+    },
+    
+    /**
+     * Add service to cart
+     * @param {number} serviceId - Service ID
+     * @param {number} quantity - Quantity
+     * @param {Object} appointmentDetails - Optional appointment details
+     * @returns {Promise<boolean>} - Success status
+     */
+    addToCart: async (serviceId, quantity, appointmentDetails = null) => {
+        try {
+            // Show loading state
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            const originalBtnText = addToCartBtn ? addToCartBtn.innerHTML : '';
+            
+            if (addToCartBtn) {
+                addToCartBtn.disabled = true;
+                addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adding...';
+            }
+            
+            // Create options object
+            const options = {};
+            if (appointmentDetails) {
+                options.appointment = appointmentDetails;
+            }
+            
+            // Add to cart using Cart module
+            const success = await Cart.addItem('service', serviceId, quantity, options);
+            
+            // Reset button state
+            if (addToCartBtn) {
+                addToCartBtn.disabled = false;
+                addToCartBtn.innerHTML = originalBtnText;
+            }
+            
+            return success;
+        } catch (error) {
+            console.error('Error adding service to cart:', error);
+            
+            // Reset button state
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            if (addToCartBtn) {
+                addToCartBtn.disabled = false;
+                addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart mr-2"></i> Add to Cart';
+            }
+            
+            return false;
+        }
     },
     
     /**
