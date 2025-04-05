@@ -427,7 +427,7 @@ const ProductDetailModule = {
         }
         
         // Initialize reviews section
-        ReviewsModule.initProductReviews('reviews-section', productId, isAuthenticated);
+        ReviewsModule.initReviews('reviews-section', productId, 'product', isAuthenticated);
     },
     
     /**
