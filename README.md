@@ -14,6 +14,108 @@ Welcome to Sundarta, an elegant and user-friendly platform where you can explore
 </div>
 
 
+## 🚀 Quick Start
+
+### Local Development with Docker
+
+1. Make sure you have Docker and Docker Compose installed
+2. Clone the repository
+3. Copy `.env.example` to `.env` and configure your environment variables
+4. Run the following commands:
+
+```bash
+# Build and start the containers
+docker-compose up --build
+
+# Install dependencies
+docker-compose exec app composer install
+```
+
+The application will be available at:
+- Frontend: http://localhost:8080
+- Database: localhost:3306 (MySQL)
+
+### Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+APP_ENV=development
+APP_TIMEZONE=UTC
+DB_HOST=db
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=sundarta
+```
+
+## 📦 Deployment
+
+### Shared Hosting (e.g., Hostinger)
+
+1. Upload the following directories to your hosting:
+   - `public/`
+   - `backend/`
+   - `frontend/`
+   - `vendor/`
+   - `.env`
+
+2. Update the `.htaccess` file if deploying to a subdirectory:
+   ```apache
+   RewriteBase /your-subdirectory/
+   ```
+
+3. Import your database using phpMyAdmin
+
+### Docker Platforms (e.g., Render, Railway)
+
+1. Push your code to a Git repository
+2. Create a new web service
+3. Configure the following:
+   - Build Command: `docker build -t sundarta .`
+   - Start Command: `docker-compose up`
+   - Port: 8080
+4. Add a MySQL add-on or configure an external database
+5. Set up environment variables
+
+## 🛠️ Project Structure
+
+```
+Sundarta/
+├── docker/                  # Docker configuration
+│   ├── Dockerfile
+│   └── apache.conf
+├── public/                  # Web root
+│   ├── index.php
+│   ├── .htaccess
+│   └── assets/
+├── backend/                 # Backend logic
+│   └── api/
+├── frontend/               # Frontend templates
+├── vendor/                 # Composer dependencies
+├── .env                    # Environment variables
+├── .env.example           # Example environment variables
+├── composer.json          # PHP dependencies
+└── docker-compose.yml     # Docker services
+```
+
+## 🔧 Development
+
+### Running Tests
+
+```bash
+docker-compose exec app php vendor/bin/phpunit
+```
+
+### Database Migrations
+
+```bash
+docker-compose exec app php migrations/migrate.php
+```
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Installation
 
 Follow these steps to set up the application locally and test it.
@@ -124,6 +226,206 @@ After completing the setup:
 - PHP and MySQL/MariaDB can be installed using your package manager (e.g., `sudo apt install php mysql-server`).
 - Make sure to install the necessary PHP extensions (such as `pdo_mysql`) if they're not installed by default.
 
+## Production Deployment Guide
+
+This guide explains how to deploy Sundarta to a production environment.
+
+### Prerequisites
+
+- A server with Docker and Docker Compose installed
+- Domain name configured to point to your server
+- SSL certificates for your domain (for HTTPS)
+
+### Deployment Steps
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/yourusername/Sundarta.git
+cd Sundarta
+```
+
+2. **Configure production environment**
+
+Create a production environment file with secure credentials:
+
+```bash
+cp .env.example .env.production
+```
+
+Edit `.env.production` with your production settings:
+- Set `APP_ENV=production`
+- Set `APP_DEBUG=false`
+- Configure database credentials
+- Set `APP_URL` to your domain name
+- Configure mail settings
+- Set `COOKIE_SECURE=true` and `COOKIE_DOMAIN` to your domain
+
+3. **Generate SSL certificates**
+
+For production, you should use proper SSL certificates. You can use Let's Encrypt:
+
+```bash
+mkdir -p docker/nginx/ssl
+# Using certbot for Let's Encrypt
+sudo certbot certonly --webroot -w /path/to/Sundarta/public -d yourdomain.com -d www.yourdomain.com
+
+# Copy certificates to the right location
+sudo cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem docker/nginx/ssl/sundarta.crt
+sudo cp /etc/letsencrypt/live/yourdomain.com/privkey.pem docker/nginx/ssl/sundarta.key
+sudo chown -R $USER:$USER docker/nginx/ssl
+```
+
+4. **Update Nginx configuration**
+
+Edit `docker/nginx/conf.d/app.conf` to use your domain name.
+
+5. **Build and deploy**
+
+Use the deployment script to build and deploy the application:
+
+```bash
+./deploy.sh
+```
+
+The script will:
+- Backup the database if there's an existing installation
+- Copy production environment file
+- Pull latest changes from git
+- Build Docker containers
+- Start the application
+- Verify the deployment
+
+6. **Verify the deployment**
+
+Access your domain in a web browser to make sure everything is working.
+
+You can also check the application logs:
+
+```bash
+docker-compose logs -f
+```
+
+### Production Maintenance
+
+#### Database Backups
+
+Create regular database backups using the Makefile command:
+
+```bash
+make backup
+```
+
+Backups are stored in the `backups/` directory.
+
+#### Updating the Application
+
+To update the application to the latest version:
+
+```bash
+git pull
+./deploy.sh --skip-build  # Use if no dependencies have changed
+```
+
+For a full rebuild:
+
+```bash
+./deploy.sh
+```
+
+#### Security Considerations
+
+1. Never expose the database ports to the internet
+2. Keep your environment files secure
+3. Regularly update Docker images and dependencies
+4. Set up automated backups
+5. Monitor your application with the health check endpoint
+
+## Development Guide
+
+For local development, use the following commands:
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/Sundarta.git
+cd Sundarta
+
+# Setup environment
+make setup
+
+# Start development environment
+make up
+```
+
+### Common Development Commands
+
+```bash
+# View container logs
+make logs
+
+# Restart containers
+make restart
+
+# Stop containers
+make down
+
+# Rebuild containers
+make build
+```
+
+## Switching Between Development and Production
+
+The Sundarta project is set up to easily switch between development and production environments using Docker Compose profiles.
+
+### Development Mode
+
+```bash
+# Start development environment
+make dev
+# or
+export APP_ENV=development && docker-compose up -d
+```
+
+### Production Mode
+
+```bash
+# Start production environment
+make prod
+# or
+export APP_ENV=production && docker-compose --profile production up -d
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Database Connection Errors**
+   - Check database credentials in `.env` file
+   - Ensure the database container is running: `docker-compose ps`
+   - Check database logs: `docker-compose logs db`
+
+2. **Web Server Issues**
+   - Check Nginx configuration in `docker/nginx/conf.d/app.conf`
+   - Verify certificates are correct in `docker/nginx/ssl/`
+   - Check webserver logs: `docker-compose logs webserver`
+
+3. **Application Errors**
+   - Check application logs: `docker-compose logs app`
+   - Verify environment variables are set correctly
+   - Check PHP error log: `docker-compose exec app cat /var/log/php_errors.log`
+
+### Health Check
+
+Access the health check endpoint to verify your application status:
+
+```
+https://yourdomain.com/api/health
+```
+
+This will return application health information in JSON format.
+
 ## License
 
-This project is licensed under the MIT License. 
+[Your License Information] 

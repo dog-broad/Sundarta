@@ -19,7 +19,7 @@ require_once __DIR__ . '/../backend/helpers/auth.php';
 
 // Redirect to login if user is not authenticated
 if (!isAuthenticated()) {
-    header('Location: /sundarta/login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: /login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
@@ -63,7 +63,7 @@ require 'partials/header.php';
             <button id="checkout-btn" class="btn btn-primary w-full mb-2">Proceed to Checkout</button>
             
             <div class="text-center mt-4">
-                <a href="/sundarta/orders" class="text-sm text-primary hover:underline">
+                <a href="/orders" class="text-sm text-primary hover:underline">
                     <i class="fas fa-history mr-1"></i> View Order History
                 </a>
             </div>
@@ -73,7 +73,7 @@ require 'partials/header.php';
 </div>
 
 <!-- Include JavaScript Files -->
-<script type="module" src="/sundarta/assets/js/cart-page.js"></script>
+<script type="module" src="/assets/js/cart-page.js"></script>
 
 <?php
 require 'partials/footer.php';

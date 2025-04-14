@@ -18,11 +18,11 @@
                 <div>
                     <h3 class="font-heading text-xl mb-4">Quick Links</h3>
                     <ul class="footer-list">
-                        <li><a href="/sundarta/about">About Us</a></li>
-                        <li><a href="/sundarta/products">Products</a></li>
-                        <li><a href="/sundarta/services">Services</a></li>
-                        <li><a href="/sundarta/blog">Blog</a></li>
-                        <li><a href="/sundarta/contact">Contact Us</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/about">About Us</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/products">Products</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/services">Services</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/blog">Blog</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/contact">Contact Us</a></li>
                     </ul>
                 </div>
                 
@@ -30,10 +30,10 @@
                 <div>
                     <h3 class="font-heading text-xl mb-4">Customer Service</h3>
                     <ul class="footer-list">
-                        <li><a href="/sundarta/faq">FAQ</a></li>
-                        <li><a href="/sundarta/shipping">Shipping & Returns</a></li>
-                        <li><a href="/sundarta/terms">Terms & Conditions</a></li>
-                        <li><a href="/sundarta/privacy">Privacy Policy</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/faq">FAQ</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/shipping">Shipping & Returns</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/terms">Terms & Conditions</a></li>
+                        <li><a href="<?php echo $baseUrl ?? ''; ?>/privacy">Privacy Policy</a></li>
                     </ul>
                 </div>
                 
@@ -73,13 +73,17 @@
         </button>
     </footer>
     
-    <script src="/sundarta/assets/js/script.js"></script>
-    <script type="module" src="/sundarta/assets/js/utils/charts.js"></script> <!-- Only needed for admin dashboard -->
-    <script type="module" src="/sundarta/assets/js/utils/validation.js"></script>
-    <script type="module" src="/sundarta/assets/js/utils/ui.js"></script>
-    <script type="module" src="/sundarta/assets/js/utils/price.js"></script>
-    <script type="module" src="/sundarta/assets/js/utils/pagination.js"></script>
-    <script type="module" src="/sundarta/assets/js/utils/filters.js"></script>
+    <!-- Regular JavaScript -->
+    <script type="text/javascript" src="<?php echo $baseUrl ?? ''; ?>/assets/js/script.js"></script>
+    
+    <!-- ES Modules -->
+    <script type="module" src="<?php echo $baseUrl ?? ''; ?>/assets/js/utils/charts.js"></script>
+    <script type="module" src="<?php echo $baseUrl ?? ''; ?>/assets/js/utils/validation.js"></script>
+    <script type="module" src="<?php echo $baseUrl ?? ''; ?>/assets/js/utils/ui.js"></script>
+    <script type="module" src="<?php echo $baseUrl ?? ''; ?>/assets/js/utils/price.js"></script>
+    <script type="module" src="<?php echo $baseUrl ?? ''; ?>/assets/js/utils/pagination.js"></script>
+    <script type="module" src="<?php echo $baseUrl ?? ''; ?>/assets/js/utils/filters.js"></script>
+    <script type="text/javascript" src="<?php echo $baseUrl ?? ''; ?>/assets/js/test.js"></script>
     <script>
         // Initialize toggle functionality for search and user dropdown
         document.getElementById('search-toggle').addEventListener('change', function() {

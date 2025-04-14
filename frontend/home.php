@@ -11,8 +11,8 @@ require 'partials/header.php';
             <h1 class="font-heading text-4xl md:text-5xl mb-4">Discover Natural Beauty & Wellness</h1>
             <p class="text-text-light mb-6">Experience the power of traditional Indian beauty rituals with our handcrafted products and authentic wellness services.</p>
             <div class="flex flex-wrap gap-4">
-                <a href="/sundarta/products" class="btn btn-primary">Shop Products</a>
-                <a href="/sundarta/services" class="btn btn-outline">Explore Services</a>
+                <a href="/products" class="btn btn-primary">Shop Products</a>
+                <a href="/services" class="btn btn-outline">Explore Services</a>
             </div>
         </div>
     </div>
@@ -29,7 +29,7 @@ require 'partials/header.php';
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <a href="/sundarta/products?category=skincare" class="card text-center p-6 hover:shadow-xl transition-shadow">
+        <a href="/products?category=skincare" class="card text-center p-6 hover:shadow-xl transition-shadow">
             <div class="text-primary text-4xl mb-4">
                 <i class="fas fa-leaf"></i>
             </div>
@@ -37,7 +37,7 @@ require 'partials/header.php';
             <p class="text-text-light">Natural products for radiant skin</p>
         </a>
         
-        <a href="/sundarta/products?category=haircare" class="card text-center p-6 hover:shadow-xl transition-shadow">
+        <a href="/products?category=haircare" class="card text-center p-6 hover:shadow-xl transition-shadow">
             <div class="text-primary text-4xl mb-4">
                 <i class="fas fa-spa"></i>
             </div>
@@ -45,7 +45,7 @@ require 'partials/header.php';
             <p class="text-text-light">Traditional remedies for healthy hair</p>
         </a>
         
-        <a href="/sundarta/services" class="card text-center p-6 hover:shadow-xl transition-shadow">
+        <a href="/services" class="card text-center p-6 hover:shadow-xl transition-shadow">
             <div class="text-primary text-4xl mb-4">
                 <i class="fas fa-hands"></i>
             </div>
@@ -62,7 +62,7 @@ require 'partials/header.php';
             <h2 class="font-heading text-3xl mb-2">Featured Products</h2>
             <p class="text-text-light">Discover our most popular beauty products</p>
         </div>
-        <a href="/sundarta/products" class="hover-link text-primary">
+        <a href="/products" class="hover-link text-primary">
             View All <i class="fas fa-arrow-right ml-1"></i>
         </a>
     </div>
@@ -84,7 +84,7 @@ require 'partials/header.php';
             <p class="text-text-light mb-6">
                 Our ingredients are ethically sourced from across India, supporting local communities and sustainable farming practices.
             </p>
-            <a href="/sundarta/about" class="btn btn-primary">Learn More About Us</a>
+            <a href="/about" class="btn btn-primary">Learn More About Us</a>
         </div>
         <div class="relative">
             <img src="https://img.freepik.com/free-photo/woman-with-face-mask-sitting-chair_23-2148758655.jpg" alt="Ayurvedic Beauty" class="rounded-lg shadow-lg">
@@ -101,7 +101,7 @@ require 'partials/header.php';
             <h2 class="font-heading text-3xl mb-2">Our Services</h2>
             <p class="text-text-light">Experience authentic wellness treatments</p>
         </div>
-        <a href="/sundarta/services" class="hover-link text-primary">
+        <a href="/services" class="hover-link text-primary">
             View All <i class="fas fa-arrow-right ml-1"></i>
         </a>
     </div>
@@ -170,7 +170,7 @@ require 'partials/header.php';
 </section>
 
 <script type="module">
-    import HomeModule from '/sundarta/assets/js/modules/home.js';
+    import HomeModule from '/assets/js/modules/home.js';
     
     document.addEventListener('DOMContentLoaded', () => {
         HomeModule.init();

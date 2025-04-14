@@ -96,8 +96,8 @@ require 'partials/header.php';
         <h2 class="font-heading text-3xl mb-4">Join Our Journey</h2>
         <p class="text-text-light mb-8 max-w-2xl mx-auto">Be part of our mission to revolutionize beauty and wellness through natural, traditional practices.</p>
         <div class="flex justify-center gap-4">
-            <a href="/sundarta/contact" class="btn btn-primary">Contact Us</a>
-            <a href="/sundarta/register" class="btn btn-outline">Join Now</a>
+            <a href="/contact" class="btn btn-primary">Contact Us</a>
+            <a href="/register" class="btn btn-outline">Join Now</a>
         </div>
     </section>
 </div>

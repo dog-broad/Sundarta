@@ -48,7 +48,7 @@ if (isLoggedIn()) {
 </div>
 
 <!-- Include JavaScript Files -->
-<script type="module" src="/sundarta/assets/js/products-page.js"></script>
+<script type="module" src="/assets/js/products-page.js"></script>
 
 <?php
 require 'partials/footer.php';

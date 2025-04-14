@@ -83,13 +83,13 @@ if (isAuthenticated()) {
         <!-- Login Link -->
         <p class="text-center mt-4">
             Already have an account? 
-            <a href="/sundarta/login" class="text-primary hover:text-primary-dark">Login here</a>
+            <a href="/login" class="text-primary hover:text-primary-dark">Login here</a>
         </p>
     </div>
 </div>
 
 <!-- Import Auth Module -->
-<script type="module" src="/sundarta/assets/js/modules/auth.js"></script>
+<script type="module" src="/assets/js/modules/auth.js"></script>
 
 <?php
 require 'partials/footer.php';

@@ -48,6 +48,9 @@ require_once __DIR__ . '/db.php';
 // Include auth helper
 require_once __DIR__ . '/../helpers/auth.php';
 
+// Include URL helper
+require_once __DIR__ . '/../helpers/urls.php';
+
 // Function to handle API errors
 function apiError($message, $statusCode = 400) {
     http_response_code($statusCode);

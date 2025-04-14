@@ -4,7 +4,7 @@ require 'partials/header.php';
 
 // Redirect if not logged in
 if (!isLoggedIn()) {
-    header('Location: /sundarta/login?redirect=/sundarta/profile');
+    header('Location: /login?redirect=/profile');
     exit;
 }
 ?>
@@ -135,7 +135,7 @@ if (!isLoggedIn()) {
 </div>
 
 <script type="module">
-    import ProfileModule from '/sundarta/assets/js/modules/profile.js';
+    import ProfileModule from '/assets/js/modules/profile.js';
     
     // Initialize profile module
     document.addEventListener('DOMContentLoaded', () => {

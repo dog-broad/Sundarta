@@ -14,7 +14,7 @@ require_once __DIR__ . '/../backend/helpers/auth.php';
 
 // Redirect to login if user is not authenticated
 if (!isAuthenticated()) {
-    header('Location: /sundarta/login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: /login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
@@ -42,13 +42,13 @@ require 'partials/header.php';
             </div>
             <h3 class="text-xl font-medium mb-2">No orders yet</h3>
             <p class="text-text-light mb-6">You haven't placed any orders yet.</p>
-            <a href="/sundarta/products" class="btn btn-primary">Start Shopping</a>
+            <a href="/products" class="btn btn-primary">Start Shopping</a>
         </div>
     </div>
 </div>
 
 <!-- Include JavaScript Files -->
-<script type="module" src="/sundarta/assets/js/orders-page.js"></script>
+<script type="module" src="/assets/js/orders-page.js"></script>
 
 <?php
 require 'partials/footer.php';

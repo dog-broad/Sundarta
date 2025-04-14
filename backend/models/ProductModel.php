@@ -15,13 +15,15 @@ class ProductModel extends BaseModel {
      * @param float $price Product price
      * @param int $stock Product stock
      * @param int $category Category ID
+     * @param string $specifications JSON string of product specifications
+     * @param string $instructions Product usage instructions
      * @param string $images JSON string of image URLs
      * @return int|false Product ID or false on failure
      */
-    public function create($name, $description, $price, $stock, $category, $images = '[]') {
-        $sql = "INSERT INTO {$this->table} (name, description, price, stock, category, images) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        return $this->insert($sql, [$name, $description, $price, $stock, $category, $images], 'ssdiis');
+    public function create($name, $description, $price, $stock, $category, $specifications = '{}', $instructions = '', $images = '[]') {
+        $sql = "INSERT INTO {$this->table} (name, description, price, stock, category, specifications, instructions, images) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        return $this->insert($sql, [$name, $description, $price, $stock, $category, $specifications, $instructions, $images], 'ssdiisss');
     }
 
     /**
@@ -47,7 +49,7 @@ class ProductModel extends BaseModel {
      * @return bool True on success, false on failure
      */
     public function update($id, $data) {
-        $allowedFields = ['name', 'description', 'price', 'stock', 'category', 'images'];
+        $allowedFields = ['name', 'description', 'price', 'stock', 'category', 'specifications', 'instructions', 'images'];
         $updates = [];
         $params = [];
         $types = '';

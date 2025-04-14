@@ -45,7 +45,7 @@ class ServiceController extends BaseController {
         }
         
         $service = $this->serviceModel->getById($id);
-        
+
         if (!$service) {
             $this->sendError('Service not found', 404);
         }
@@ -85,6 +85,20 @@ class ServiceController extends BaseController {
             $data['images'] = '[]';
         }
         
+        // Handle process (convert array to JSON if needed)
+        if (isset($data['process']) && is_array($data['process'])) {
+            $data['process'] = json_encode($data['process']);
+        } else if (!isset($data['process'])) {
+            $data['process'] = '[]';
+        }
+        
+        // Handle faqs (convert object to JSON if needed)
+        if (isset($data['faqs']) && is_array($data['faqs'])) {
+            $data['faqs'] = json_encode($data['faqs']);
+        } else if (!isset($data['faqs'])) {
+            $data['faqs'] = '{}';
+        }
+        
         // Create service
         $userId = getCurrentUserId();
         $serviceId = $this->serviceModel->create(
@@ -93,7 +107,9 @@ class ServiceController extends BaseController {
             $data['description'],
             $data['price'],
             $data['category'],
-            $data['images']
+            $data['images'],
+            $data['process'] ?? '[]',
+            $data['faqs'] ?? '{}'
         );
         
         if (!$serviceId) {
@@ -140,6 +156,16 @@ class ServiceController extends BaseController {
         // Handle images (convert array to JSON if needed)
         if (isset($data['images']) && is_array($data['images'])) {
             $data['images'] = json_encode($data['images']);
+        }
+        
+        // Handle process (convert array to JSON if needed)
+        if (isset($data['process']) && is_array($data['process'])) {
+            $data['process'] = json_encode($data['process']);
+        }
+        
+        // Handle faqs (convert object to JSON if needed)
+        if (isset($data['faqs']) && is_array($data['faqs'])) {
+            $data['faqs'] = json_encode($data['faqs']);
         }
         
         // Update service

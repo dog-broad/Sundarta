@@ -18,13 +18,13 @@ require_once __DIR__ . '/../../backend/helpers/auth.php';
 
 // Check authentication first
 if (!isAuthenticated()) {
-    header('Location: /sundarta/login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: /login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
 // Then check admin role
 if (!hasRole('admin')) {
-    header('Location: /sundarta/');
+    header('Location: /');
     exit;
 }
 

@@ -19,13 +19,13 @@ require_once __DIR__ . '/../../backend/helpers/auth.php';
 
 // Check authentication first
 if (!isAuthenticated()) {
-    header('Location: /sundarta/login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: /login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
 // Then check admin role
 if (!hasRole('admin')) {
-    header('Location: /sundarta/');
+    header('Location: /');
     exit;
 }
 
@@ -77,7 +77,7 @@ require '../partials/header.php';
         <div class="card">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-heading text-xl">Recent Orders</h3>
-                <a href="/sundarta/admin/orders" class="text-primary hover:text-primary-dark">View All</a>
+                <a href="/admin/orders" class="text-primary hover:text-primary-dark">View All</a>
             </div>
             <div class="recent-orders">
                 <!-- Will be populated by JS -->
@@ -88,7 +88,7 @@ require '../partials/header.php';
         <div class="card">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-heading text-xl">Recent Users</h3>
-                <a href="/sundarta/admin/users" class="text-primary hover:text-primary-dark">View All</a>
+                <a href="/admin/users" class="text-primary hover:text-primary-dark">View All</a>
             </div>
             <div class="recent-users">
                 <!-- Will be populated by JS -->

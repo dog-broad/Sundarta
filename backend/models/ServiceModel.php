@@ -16,12 +16,14 @@ class ServiceModel extends BaseModel {
      * @param float $price Service price
      * @param int $category Category ID
      * @param string $images JSON string of image URLs
+     * @param string $process JSON string of process steps
+     * @param string $faqs JSON string of FAQs
      * @return int|false Service ID or false on failure
      */
-    public function create($userId, $name, $description, $price, $category, $images = '[]') {
-        $sql = "INSERT INTO {$this->table} (user_id, name, description, price, category, images) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        return $this->insert($sql, [$userId, $name, $description, $price, $category, $images], 'issdis');
+    public function create($userId, $name, $description, $price, $category, $images = '[]', $process = '[]', $faqs = '{}') {
+        $sql = "INSERT INTO {$this->table} (user_id, name, description, price, category, images, process, faqs) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        return $this->insert($sql, [$userId, $name, $description, $price, $category, $images, $process, $faqs], 'issdiiss');
     }
 
 
@@ -48,7 +50,7 @@ class ServiceModel extends BaseModel {
      * @return bool True on success, false on failure
      */
     public function update($id, $data) {
-        $allowedFields = ['name', 'description', 'price', 'category', 'images'];
+        $allowedFields = ['name', 'description', 'price', 'category', 'images', 'process', 'faqs'];
         $updates = [];
         $params = [];
         $types = '';

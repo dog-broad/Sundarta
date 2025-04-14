@@ -19,8 +19,8 @@ if ($_ENV['APP_ENV'] === 'development') {
 // Set default timezone
 date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'UTC');
 
-// Actual URL beig called: http://localhost/sundarta/api/users/login
-// What index.php sees: http://localhost/sundarta/index.php?api_route=users/login
+// Actual URL beig called: http://localhost/api/users/login
+// What index.php sees: http://localhost/index.php?api_route=users/login
 
 // Handle API requests
 if (isset($_GET['api_route'])) {
@@ -108,8 +108,8 @@ if (isset($_GET['api_route'])) {
     exit;
 }
 
-// Actual URL beig called: http://localhost/sundarta/template
-// What index.php sees: http://localhost/sundarta/index.php?route=template
+// Actual URL beig called: http://localhost/template
+// What index.php sees: http://localhost/index.php?route=template
 
 // Handle frontend routes
 $route = $_GET['route'] ?? '';

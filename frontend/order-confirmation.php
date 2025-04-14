@@ -14,7 +14,7 @@ require_once __DIR__ . '/../backend/helpers/auth.php';
 
 // Redirect to login if user is not authenticated
 if (!isAuthenticated()) {
-    header('Location: /sundarta/login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: /login?redirect=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
@@ -22,7 +22,7 @@ if (!isAuthenticated()) {
 $order_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if (!$order_id) {
-    header('Location: /sundarta/orders');
+    header('Location: /orders');
     exit;
 }
 
@@ -71,13 +71,13 @@ require 'partials/header.php';
     </div>
     
     <div class="text-center mt-8">
-        <a href="/sundarta/products" class="btn btn-primary">Continue Shopping</a>
-        <a href="/sundarta/orders" class="btn btn-outline ml-4">View All Orders</a>
+        <a href="/products" class="btn btn-primary">Continue Shopping</a>
+        <a href="/orders" class="btn btn-outline ml-4">View All Orders</a>
     </div>
 </div>
 
 <!-- Include JavaScript Files -->
-<script type="module" src="/sundarta/assets/js/order-confirmation-page.js"></script>
+<script type="module" src="/assets/js/order-confirmation-page.js"></script>
 
 <?php
 require 'partials/footer.php';

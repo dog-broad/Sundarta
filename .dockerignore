@@ -1,0 +1,52 @@
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Docker files
+docker-compose*.yml
+.dockerignore
+Dockerfile
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Development files
+.editorconfig
+.env.example
+.env.development
+.env.testing
+README.md
+*.md
+*.log
+.DS_Store
+Thumbs.db
+
+# Backup files
+backups/
+*.sql
+*.bak
+
+# Build artifacts
+storage/logs/*
+storage/cache/*
+storage/sessions/*
+
+# Testing
+tests/
+phpunit.*
+jest.config.js
+
+# Deploy scripts
+deploy.sh
+
+# Editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo 

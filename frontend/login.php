@@ -52,13 +52,13 @@ require 'partials/header.php';
         <!-- Registration Link -->
         <p class="text-center mt-4">
             Don't have an account? 
-            <a href="/sundarta/register" class="text-primary hover:text-primary-dark">Register here</a>
+            <a href="/register" class="text-primary hover:text-primary-dark">Register here</a>
         </p>
     </div>
 </div>
 
 <!-- Import Auth Module -->
-<script type="module" src="/sundarta/assets/js/modules/auth.js"></script>
+<script type="module" src="/assets/js/modules/auth.js"></script>
 
 <?php
 require 'partials/footer.php';
