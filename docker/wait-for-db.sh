@@ -39,10 +39,14 @@ while [ $COUNTER -lt $MAX_TRIES ]; do
     echo "⚠️ MySQL is not available yet. Waiting $SLEEP_TIME seconds..."
     sleep $SLEEP_TIME
 done
-
 # Log the project structure for debugging purposes, skipping vendor and .git folders
 echo "🔍 Logging project structure for debugging..."
-tree /var/www/html --prune -I 'vendor|.git'
+if command -v tree > /dev/null; then
+    tree /var/www/html --prune -I 'vendor|.git'
+else
+    echo "⚠️ 'tree' command not found. Falling back to 'find' command."
+    find /var/www/html -type d -not -path '*/vendor/*' -not -path '*/.git/*' -print
+fi
 
 # Database script path
 DB_SCRIPT="/var/www/html/DB.sql"
