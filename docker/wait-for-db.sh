@@ -40,6 +40,10 @@ while [ $COUNTER -lt $MAX_TRIES ]; do
     sleep $SLEEP_TIME
 done
 
+# Log the project structure for debugging purposes, skipping vendor and .git folders
+echo "🔍 Logging project structure for debugging..."
+tree /var/www/html --prune -I 'vendor|.git'
+
 # Database script path
 DB_SCRIPT="/var/www/html/DB.sql"
 
