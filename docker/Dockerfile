@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     default-mysql-client \
     cron \
+    tree \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -64,6 +65,9 @@ RUN touch /var/log/php_errors.log \
 # Copy database connection check script
 COPY docker/wait-for-db.sh /usr/local/bin/wait-for-db.sh
 RUN chmod +x /usr/local/bin/wait-for-db.sh
+
+# Specifically copy the DB.sql file first to ensure it's available
+COPY DB.sql /var/www/html/DB.sql
 
 # Copy the vendor directory from the composer stage
 COPY --from=composer /app/vendor /var/www/html/vendor
@@ -106,7 +110,8 @@ RUN chown -R www-data:www-data /var/www && \
     chmod -R 755 /var/www/html && \
     chmod -R 775 /var/www/html/storage && \
     chmod -R 775 /var/www/html/public/assets && \
-    find /var/www/html/public/assets -type f -exec chmod 644 {} \;
+    find /var/www/html/public/assets -type f -exec chmod 644 {} \; && \
+    chmod 644 /var/www/html/DB.sql
 
 EXPOSE 80
 

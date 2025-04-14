@@ -39,6 +39,7 @@ while [ $COUNTER -lt $MAX_TRIES ]; do
     echo "⚠️ MySQL is not available yet. Waiting $SLEEP_TIME seconds..."
     sleep $SLEEP_TIME
 done
+
 # Log the project structure for debugging purposes, skipping vendor and .git folders
 echo "🔍 Logging project structure for debugging..."
 if command -v tree > /dev/null; then
@@ -48,11 +49,45 @@ else
     find /var/www/html -not -path '*/vendor/*' -not -path '*/.git/*' -print
 fi
 
-# Database script path
-DB_SCRIPT="/var/www/html/DB.sql"
+# Check for DB.sql in multiple locations
+echo "🔍 Looking for DB.sql file..."
+DB_SCRIPT=""
+DB_LOCATIONS=(
+    "/var/www/html/DB.sql"
+    "/docker-entrypoint-initdb.d/DB.sql"
+    "/var/www/DB.sql"
+)
 
-# Check if we need to initialize the database
-if [ -f "$DB_SCRIPT" ] && [ "$APP_ENV" = "development" ]; then
+for loc in "${DB_LOCATIONS[@]}"; do
+    if [ -f "$loc" ]; then
+        DB_SCRIPT="$loc"
+        echo "✅ Found DB.sql at $DB_SCRIPT"
+        break
+    fi
+done
+
+# If DB.sql not found in the usual locations, check if it might be in the current directory
+if [ -z "$DB_SCRIPT" ] && [ -f "DB.sql" ]; then
+    DB_SCRIPT="$(pwd)/DB.sql"
+    echo "✅ Found DB.sql in current directory at $DB_SCRIPT"
+fi
+
+# Copy DB.sql to a known location if it's not already in the expected path
+if [ -n "$DB_SCRIPT" ] && [ "$DB_SCRIPT" != "/var/www/html/DB.sql" ]; then
+    echo "📋 Copying $DB_SCRIPT to /var/www/html/DB.sql for easier access"
+    cp "$DB_SCRIPT" "/var/www/html/DB.sql"
+    DB_SCRIPT="/var/www/html/DB.sql"
+fi
+
+# Check if the database exists and create it if needed
+echo "🔄 Checking if database $DB_NAME exists..."
+if ! mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" ${DB_PASS:+-p"$DB_PASS"} -e "USE $DB_NAME" 2>/dev/null; then
+    echo "🔄 Database $DB_NAME does not exist, creating it..."
+    mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" ${DB_PASS:+-p"$DB_PASS"} -e "CREATE DATABASE IF NOT EXISTS $DB_NAME"
+fi
+
+# Initialize database if DB.sql is found
+if [ -n "$DB_SCRIPT" ]; then
     echo "🔄 Checking if database needs initialization..."
     
     # Check if users table exists as an indicator of whether DB is initialized
@@ -65,6 +100,9 @@ if [ -f "$DB_SCRIPT" ] && [ "$APP_ENV" = "development" ]; then
     else
         echo "✅ Database already initialized!"
     fi
+else
+    echo "⚠️ DB.sql not found. Database initialization skipped."
+    echo "⚠️ Please ensure DB.sql is available in the container or mounted as a volume."
 fi
 
 echo "🚀 Starting Apache..."
