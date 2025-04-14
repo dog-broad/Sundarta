@@ -1,0 +1,42 @@
+version: '3.8'
+
+# This configuration is specifically optimized for Render deployment
+# It assumes an external database provided by Render or elsewhere
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - APP_ENV=production
+    ports:
+      - "10000:80"  # Render uses port 10000 by default
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      # Database credentials will be injected by Render's environment variables
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT:-3306}
+      - APP_URL=${APP_URL}
+      - APP_TIMEZONE=${APP_TIMEZONE:-UTC}
+      - APP_NAME=${APP_NAME:-Sundarta}
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Use explicit paths that Render can create in a persistent disk
+      - data:/var/www/html/storage
+      - data:/var/www/html/public/assets/uploads
+
+volumes:
+  data:
+    # This will be mapped to a persistent disk on Render
+    driver: local 

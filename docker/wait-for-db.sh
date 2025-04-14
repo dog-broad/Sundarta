@@ -5,8 +5,16 @@ DB_HOST=${DB_HOST:-localhost}
 DB_USER=${DB_USER:-root}
 DB_PASS=${DB_PASS:-}
 DB_PORT=${DB_PORT:-3306}
+DB_NAME=${DB_NAME:-sundarta_db}
+APP_TIMEZONE=${APP_TIMEZONE:-UTC}
 MAX_TRIES=${MAX_TRIES:-30}
 SLEEP_TIME=${SLEEP_TIME:-5}
+
+# Set PHP timezone dynamically (can't use env vars directly in php.ini)
+if [ -n "$APP_TIMEZONE" ]; then
+    echo "Setting PHP timezone to $APP_TIMEZONE"
+    echo "date.timezone = $APP_TIMEZONE" > /usr/local/etc/php/conf.d/timezone.ini
+fi
 
 echo "🔄 Checking database connection..."
 COUNTER=0
@@ -44,7 +52,7 @@ if [ -f "$DB_SCRIPT" ] && [ "$APP_ENV" = "development" ]; then
     
     if [ "$TABLE_EXISTS" -eq 0 ]; then
         echo "🔄 Initializing database with DB.sql script..."
-        mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" ${DB_PASS:+-p"$DB_PASS"} < "$DB_SCRIPT"
+        mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" ${DB_PASS:+-p"$DB_PASS"} "$DB_NAME" < "$DB_SCRIPT"
         echo "✅ Database initialized successfully!"
     else
         echo "✅ Database already initialized!"

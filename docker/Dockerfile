@@ -77,7 +77,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Conditional package installation and optimization based on environment
 RUN if [ "$APP_ENV" = "production" ]; then \
     # Optimize for production
-    composer dump-autoload --optimize --no-dev && \
+    COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload --optimize --no-dev && \
     # Configure OPcache for production
     { \
         echo 'opcache.memory_consumption=128'; \
@@ -91,8 +91,15 @@ RUN if [ "$APP_ENV" = "production" ]; then \
     } > /usr/local/etc/php/conf.d/opcache-recommended.ini; \
     else \
     # Install all dependencies for development
-    composer install --optimize-autoloader; \
+    COMPOSER_ALLOW_SUPERUSER=1 composer install --optimize-autoloader; \
     fi
+
+# Create necessary directories
+RUN mkdir -p /var/www/html/storage/logs \
+    /var/www/html/storage/cache \
+    /var/www/html/storage/sessions \
+    /var/www/html/storage/uploads \
+    /var/www/html/public/assets/uploads
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www && \

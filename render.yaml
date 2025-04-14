@@ -1,10 +1,18 @@
 services:
+  # Web service (PHP application)
   - type: web
-    name: sundarta-app
+    name: sundarta
     env: docker
     repo: https://github.com/dog-broad/Sundarta
     dockerfilePath: docker/Dockerfile
     dockerContext: .
-    plan: starter
-    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_TIMEZONE
+        value: Asia/Kolkata
+      - key: APP_NAME
+        value: Sundarta
     healthCheckPath: /api/health
