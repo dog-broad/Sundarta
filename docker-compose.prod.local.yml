@@ -20,6 +20,7 @@ services:
       - DB_USER=sundarta_user
       - DB_PASS=production_password
       - DB_NAME=sundarta_db
+      - DB_PORT=3306
       - APP_URL=localhost:8081
       - APP_TIMEZONE=Asia/Kolkata
       - APP_NAME=Sundarta

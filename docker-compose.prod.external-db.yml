@@ -1,0 +1,38 @@
+version: '3.8'
+
+# This configuration is for production environments with an external database
+# It doesn't include a db service, assuming you're connecting to an external MySQL server
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - APP_ENV=production
+    ports:
+      - "80:80"  # Standard HTTP port in production
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./public/assets/uploads:/var/www/html/public/assets/uploads
+      - /var/www/html/vendor
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      # Database credentials should be provided in .env file
+      # These are just fallbacks
+      - DB_HOST=${DB_HOST:-your-external-mysql-host}
+      - DB_USER=${DB_USER:-your-external-db-user}
+      - DB_PASS=${DB_PASS:-your-external-db-password}
+      - DB_NAME=${DB_NAME:-your-external-db-name}
+      - DB_PORT=${DB_PORT:-3306}
+      - APP_URL=${APP_URL:-https://yourdomain.com}
+      - APP_TIMEZONE=${APP_TIMEZONE:-Asia/Kolkata}
+      - APP_NAME=${APP_NAME:-Sundarta}
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s 

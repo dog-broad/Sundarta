@@ -1,58 +1,56 @@
 #!/bin/bash
-set -e
 
-# Wait for the database to be ready
-echo "Waiting for database connection..."
-MAX_TRIES=30
-TRIES=0
+# Get environment variables with defaults
+DB_HOST=${DB_HOST:-localhost}
+DB_USER=${DB_USER:-root}
+DB_PASS=${DB_PASS:-}
+DB_PORT=${DB_PORT:-3306}
+MAX_TRIES=${MAX_TRIES:-30}
+SLEEP_TIME=${SLEEP_TIME:-5}
 
-while [ $TRIES -lt $MAX_TRIES ]; do
-    if mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "SELECT 1" >/dev/null 2>&1; then
-        echo "Database connection established"
+echo "🔄 Checking database connection..."
+COUNTER=0
+
+# Try to connect to MySQL with increasing timeouts
+while [ $COUNTER -lt $MAX_TRIES ]; do
+    COUNTER=$((COUNTER+1))
+    
+    echo "⏳ Attempt $COUNTER of $MAX_TRIES: Connecting to MySQL at $DB_HOST:$DB_PORT..."
+    
+    if mysqladmin ping -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" ${DB_PASS:+-p"$DB_PASS"} --silent; then
+        echo "✅ MySQL is available! Connecting..."
         break
     fi
-    TRIES=$((TRIES+1))
-    echo "Waiting for database connection (${TRIES}/${MAX_TRIES})..."
-    sleep 2
+    
+    # If this is the last attempt, exit with error
+    if [ $COUNTER -eq $MAX_TRIES ]; then
+        echo "❌ Could not connect to MySQL after $MAX_TRIES attempts. Exiting."
+        exit 1
+    fi
+    
+    echo "⚠️ MySQL is not available yet. Waiting $SLEEP_TIME seconds..."
+    sleep $SLEEP_TIME
 done
 
-if [ $TRIES -eq $MAX_TRIES ]; then
-    echo "Error: Could not connect to the database after ${MAX_TRIES} attempts"
-    exit 1
-fi
+# Database script path
+DB_SCRIPT="/var/www/html/DB.sql"
 
-# Check if the database exists
-if ! mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "USE ${DB_NAME}" >/dev/null 2>&1; then
-    echo "Database ${DB_NAME} does not exist, creating it..."
-    mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
+# Check if we need to initialize the database
+if [ -f "$DB_SCRIPT" ] && [ "$APP_ENV" = "development" ]; then
+    echo "🔄 Checking if database needs initialization..."
     
-    # Import database schema
-    if [ -f /var/www/html/DB.sql ]; then
-        echo "Importing database schema..."
-        mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < /var/www/html/DB.sql
-        echo "Database schema imported successfully"
+    # Check if users table exists as an indicator of whether DB is initialized
+    TABLE_EXISTS=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" ${DB_PASS:+-p"$DB_PASS"} -e "USE $DB_NAME; SHOW TABLES LIKE 'users';" 2>/dev/null | grep -c 'users')
+    
+    if [ "$TABLE_EXISTS" -eq 0 ]; then
+        echo "🔄 Initializing database with DB.sql script..."
+        mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" ${DB_PASS:+-p"$DB_PASS"} < "$DB_SCRIPT"
+        echo "✅ Database initialized successfully!"
     else
-        echo "Warning: DB.sql file not found, skipping schema import"
-    fi
-else
-    echo "Database ${DB_NAME} already exists"
-    
-    # Check if the database has tables
-    TABLES=$(mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e "USE ${DB_NAME}; SHOW TABLES;" | wc -l)
-    
-    if [ "$TABLES" -le 1 ]; then
-        echo "Database exists but has no tables. Importing schema..."
-        if [ -f /var/www/html/DB.sql ]; then
-            mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < /var/www/html/DB.sql
-            echo "Database schema imported successfully"
-        else
-            echo "Warning: DB.sql file not found, skipping schema import"
-        fi
-    else
-        echo "Database already has tables. Skipping import."
+        echo "✅ Database already initialized!"
     fi
 fi
 
-# Start Apache
-echo "Starting Apache..."
-apache2-foreground 
+echo "🚀 Starting Apache..."
+# Start Apache in foreground
+exec apache2-foreground 
