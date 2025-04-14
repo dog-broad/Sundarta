@@ -45,7 +45,7 @@ if command -v tree > /dev/null; then
     tree /var/www/html --prune -I 'vendor|.git'
 else
     echo "⚠️ 'tree' command not found. Falling back to 'find' command."
-    find /var/www/html -type d -not -path '*/vendor/*' -not -path '*/.git/*' -print
+    find /var/www/html -not -path '*/vendor/*' -not -path '*/.git/*' -print
 fi
 
 # Database script path
