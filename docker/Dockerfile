@@ -66,8 +66,11 @@ RUN touch /var/log/php_errors.log \
 COPY docker/wait-for-db.sh /usr/local/bin/wait-for-db.sh
 RUN chmod +x /usr/local/bin/wait-for-db.sh
 
-# Specifically copy the DB.sql file first to ensure it's available
-COPY DB.sql /var/www/html/DB.sql
+# Create DB.sql file in the container (will be overwritten if it exists in the build context)
+RUN mkdir -p /var/www/html && touch /var/www/html/DB.sql
+
+# Try to copy DB.sql if it exists, but don't fail if it doesn't
+COPY DB.sql* /var/www/html/ 2>/dev/null || true
 
 # Copy the vendor directory from the composer stage
 COPY --from=composer /app/vendor /var/www/html/vendor
@@ -110,8 +113,7 @@ RUN chown -R www-data:www-data /var/www && \
     chmod -R 755 /var/www/html && \
     chmod -R 775 /var/www/html/storage && \
     chmod -R 775 /var/www/html/public/assets && \
-    find /var/www/html/public/assets -type f -exec chmod 644 {} \; && \
-    chmod 644 /var/www/html/DB.sql
+    find /var/www/html/public/assets -type f -exec chmod 644 {} \; 2>/dev/null || true
 
 EXPOSE 80
 

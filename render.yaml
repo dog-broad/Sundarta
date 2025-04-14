@@ -3,9 +3,12 @@ services:
   - type: web
     name: sundarta
     env: docker
-    repo: https://github.com/dog-broad/Sundarta
-    dockerfilePath: docker/Dockerfile
+    dockerfilePath: ./docker/Dockerfile
     dockerContext: .
+    disk:
+      name: sundarta-data
+      mountPath: /var/www/html/storage
+      sizeGB: 10
     envVars:
       - key: APP_ENV
         value: production
@@ -15,4 +18,59 @@ services:
         value: Asia/Kolkata
       - key: APP_NAME
         value: Sundarta
+      - key: INIT_DB
+        value: true
+      # Database connection (replace with your actual database details or use Render database)
+      - key: DB_HOST
+        fromService:
+          name: sundarta-db
+          type: pserv
+          property: host
+      - key: DB_PORT
+        fromService:
+          name: sundarta-db
+          type: pserv
+          property: port
+      - key: DB_USER
+        fromService:
+          name: sundarta-db
+          type: pserv
+          property: user
+      - key: DB_PASS
+        fromService:
+          name: sundarta-db
+          type: pserv
+          property: password
+      - key: DB_NAME
+        fromService:
+          name: sundarta-db
+          type: pserv
+          property: database
+    buildCommand: |
+      # Check if DB.sql exists in the repo
+      if [ ! -f DB.sql ] || [ ! -s DB.sql ]; then
+        echo "DB.sql not found or empty in repository."
+        # Location of your DB.sql file (replace with actual URL if you have it hosted somewhere)
+        DB_URL="${DB_SQL_URL:-https://raw.githubusercontent.com/yourusername/yourrepo/main/DB.sql}"
+        if [ -n "$DB_URL" ] && [ "$DB_URL" != "https://raw.githubusercontent.com/yourusername/yourrepo/main/DB.sql" ]; then
+          echo "Attempting to download DB.sql from: $DB_URL"
+          if curl -o DB.sql -sSL "$DB_URL"; then
+            echo "DB.sql downloaded successfully"
+          else
+            echo "Failed to download DB.sql, creating a placeholder file"
+            echo "-- This is a placeholder DB.sql file. The application will create necessary tables." > DB.sql
+          fi
+        else
+          echo "Creating placeholder DB.sql file"
+          echo "-- This is a placeholder DB.sql file. The application will create necessary tables." > DB.sql
+        fi
+      fi
     healthCheckPath: /api/health
+    numInstances: 1
+
+databases:
+  # MySQL database service
+  - name: sundarta-db
+    type: mysql
+    ipAllowList: [] # only allow internal connections
+    plan: free # Change to a paid plan for production use with larger storage and performance

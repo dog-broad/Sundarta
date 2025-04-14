@@ -27,7 +27,6 @@ Thumbs.db
 
 # Backup files
 backups/
-*.sql
 *.bak
 
 # Build artifacts
