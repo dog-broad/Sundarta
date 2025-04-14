@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: sundarta-app
+    env: docker
+    repo: https://github.com/dog-broad/Sundarta
+    dockerfilePath: docker/Dockerfile
+    dockerContext: .
+    plan: starter
+    autoDeploy: true
+    healthCheckPath: /api/health
